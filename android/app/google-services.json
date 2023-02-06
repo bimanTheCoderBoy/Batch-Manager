@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "635058857239",
+    "project_id": "batchmanager-a04ca",
+    "storage_bucket": "batchmanager-a04ca.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:635058857239:android:2caa8e96921eb483744352",
+        "android_client_info": {
+          "package_name": "com.example.batch_manager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "635058857239-6juhv86i44ts9eiaq0q04t3u8pnm4f6e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpyzY8fYacD5PyaTbXSLSftObIjG13Mhk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "635058857239-6juhv86i44ts9eiaq0q04t3u8pnm4f6e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

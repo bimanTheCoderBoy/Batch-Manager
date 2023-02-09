@@ -1,6 +1,8 @@
 // ignore_for_file: unrelated_type_equality_checks
 
+import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:batch_manager/pages/home_page.dart';
+import 'package:batch_manager/pages/homepage.dart';
 import 'package:batch_manager/pages/login.dart';
 import 'package:batch_manager/pages/register.dart';
 import 'package:batch_manager/pages/student_page.dart';
@@ -13,6 +15,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:workmanager/workmanager.dart';
 import 'firebase_options.dart';
 import 'pages/home_page.dart';
@@ -191,7 +194,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       routes: {
-        Routte.home: (context) => Home(),
+        Routte.home: (context) => Splash(),
         Routte.batches: (context) => BatchList(),
         Routte.student: (context) => Student(
               dueList: true,
@@ -212,10 +215,34 @@ class Home extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return HomePage();
+            return HomePagee();
           } else {
             return Login();
           }
         });
   }
 }
+
+class Splash extends StatelessWidget {
+  const Splash({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSplashScreen(
+      splash: Container(
+        height: 600,
+        color: Colors.amber,
+      ),
+      duration: 10000,
+      nextScreen: Home(),
+      splashTransition: SplashTransition.rotationTransition,
+      pageTransitionType: PageTransitionType.fade,
+      backgroundColor: Color(0xffA4BED0),
+    );
+    ;
+  }
+}
+//  LinearGradient(
+//                 begin: Alignment.topCenter,
+//                 end: Alignment.bottomCenter,
+//                 colors: [, Color(0xffA4BED0)])

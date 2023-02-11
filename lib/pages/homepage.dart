@@ -155,7 +155,7 @@ class _HomePageeState extends State<HomePagee> {
                                 padding: EdgeInsets.only(left: 15, top: 15),
                                 child: CircularPercentIndicator(
                                   animation: true,
-                                  animationDuration: 10000,
+                                  animationDuration: 2000,
                                   radius: 90,
                                   lineWidth: 10,
                                   percent: 0.8,
@@ -314,6 +314,7 @@ class _HomePageeState extends State<HomePagee> {
                     //   ),
                     // ),
                     Expanded(flex: 1, child: Container()),
+
                     Container(
                       child: Padding(
                         padding: const EdgeInsets.only(

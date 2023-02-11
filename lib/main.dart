@@ -230,14 +230,33 @@ class Splash extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedSplashScreen(
       splash: Container(
-        height: 600,
-        color: Colors.amber,
+        decoration: BoxDecoration(
+          border:
+              Border.all(color: Color.fromARGB(143, 243, 117, 117), width: 1),
+          borderRadius: BorderRadius.circular(13),
+        ),
+        child: Container(
+          height: 84.5,
+          width: 81,
+          clipBehavior: Clip.hardEdge,
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(13),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black12, blurRadius: 20, spreadRadius: 2),
+              ]),
+          child: Image.asset(
+            "assets/images/logo.jpg",
+            scale: 3,
+            fit: BoxFit.none,
+          ),
+        ),
       ),
-      duration: 10000,
+      duration: 1000,
       nextScreen: Home(),
-      splashTransition: SplashTransition.rotationTransition,
+      splashTransition: SplashTransition.scaleTransition,
       pageTransitionType: PageTransitionType.fade,
-      backgroundColor: Color(0xffA4BED0),
+      backgroundColor: Color.fromARGB(192, 179, 203, 222),
     );
     ;
   }

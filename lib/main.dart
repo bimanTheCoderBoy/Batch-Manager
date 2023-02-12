@@ -131,7 +131,7 @@ void callbackDispatcher() async {
   Workmanager().executeTask((taskName, inputData) async {
     switch (taskName) {
       case fee:
-        if (DateTime.now().day >= 1 && DateTime.now().day <= 10)
+        if (DateTime.now().day >= 1 && DateTime.now().day <= 20)
           await monthlyFees();
         break;
       default:

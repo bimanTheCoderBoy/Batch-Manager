@@ -19,41 +19,6 @@ class Forgot extends StatefulWidget {
 class _ForgotState extends State<Forgot> {
   var _emailCon = TextEditingController();
   var _passCon = TextEditingController();
-  Image? img;
-
-  loadd() async {
-    WhatsappClient? whatsappClient;
-    whatsappClient = await WhatsappBotFlutterMobile.connect(
-      onConnectionEvent: (ConnectionEvent event) {
-        print(event.toString());
-      },
-      onQrCode: (String qr, Uint8List? imageBytes) {
-        setState(() {
-          img = Image.memory(
-            imageBytes!,
-            width: 300,
-            height: 300,
-            scale: 1,
-            fit: BoxFit.contain,
-          );
-        });
-
-        // print();
-      },
-    );
-
-    await whatsappClient!.chat.sendTextMessage(
-      phone: "+917076316977",
-      message: "Test Message",
-    );
-
-    // whatsappClient.connectionEventStream.listen((event) {
-    //   // Connection Events : authenticated,logout,connected.....
-    //   if (whatsappClient!.isAuthenticated as bool) {
-    //     whatsappClient.logout();
-    //   }
-    // });
-  }
 
   signIn() async {
     showDialog(
@@ -173,11 +138,6 @@ class _ForgotState extends State<Forgot> {
                           SizedBox(
                             height: 30,
                           ),
-                          Container(
-                            height: 500,
-                            width: 300,
-                            child: img,
-                          ),
                           SizedBox(
                             height: 40,
                           ),
@@ -195,38 +155,38 @@ class _ForgotState extends State<Forgot> {
                                 child: IconButton(
                                     color: Colors.white,
                                     onPressed: () async {
-                                      loadd();
+                                      // loadd();
 
-                                      //   try {
-                                      //     await FirebaseAuth.instance
-                                      //         .sendPasswordResetEmail(
-                                      //             email: _emailCon.text.trim());
-                                      //     _emailCon.clear();
-                                      //     Navigator.pop(context);
-                                      //     Fluttertoast.showToast(
-                                      //         msg: " Please Check Your Email ",
-                                      //         toastLength: Toast.LENGTH_SHORT,
-                                      //         gravity: ToastGravity.BOTTOM,
-                                      //         timeInSecForIosWeb: 5,
-                                      //         backgroundColor:
-                                      //             Color.fromARGB(255, 1, 105, 48),
-                                      //         textColor: Color.fromARGB(
-                                      //             255, 255, 255, 255),
-                                      //         fontSize: 16.0);
-                                      //   } catch (e) {
-                                      //     Fluttertoast.showToast(
-                                      //         msg:
-                                      //             "  Type your Email Properly..  \n  For Resetting Password",
-                                      //         toastLength: Toast.LENGTH_SHORT,
-                                      //         gravity: ToastGravity.BOTTOM,
-                                      //         timeInSecForIosWeb: 4,
-                                      //         backgroundColor: Color.fromARGB(
-                                      //             255, 165, 87, 87),
-                                      //         textColor: Color.fromARGB(
-                                      //             255, 255, 255, 255),
-                                      //         fontSize: 16.0);
-                                      //     _emailCon.clear();
-                                      //   }
+                                      try {
+                                        await FirebaseAuth.instance
+                                            .sendPasswordResetEmail(
+                                                email: _emailCon.text.trim());
+                                        _emailCon.clear();
+                                        Navigator.pop(context);
+                                        Fluttertoast.showToast(
+                                            msg: " Please Check Your Email ",
+                                            toastLength: Toast.LENGTH_SHORT,
+                                            gravity: ToastGravity.BOTTOM,
+                                            timeInSecForIosWeb: 5,
+                                            backgroundColor:
+                                                Color.fromARGB(255, 1, 105, 48),
+                                            textColor: Color.fromARGB(
+                                                255, 255, 255, 255),
+                                            fontSize: 16.0);
+                                      } catch (e) {
+                                        Fluttertoast.showToast(
+                                            msg:
+                                                "  Type your Email Properly..  \n  For Resetting Password",
+                                            toastLength: Toast.LENGTH_SHORT,
+                                            gravity: ToastGravity.BOTTOM,
+                                            timeInSecForIosWeb: 4,
+                                            backgroundColor: Color.fromARGB(
+                                                255, 165, 87, 87),
+                                            textColor: Color.fromARGB(
+                                                255, 255, 255, 255),
+                                            fontSize: 16.0);
+                                        _emailCon.clear();
+                                      }
                                     },
                                     icon: Icon(
                                       Icons.arrow_forward,

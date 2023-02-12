@@ -69,6 +69,89 @@ class _HomePageeState extends State<HomePagee> {
       }
     }
 
+    notification() {
+      return showGeneralDialog(
+          context: context,
+          transitionBuilder: (context, a1, a2, widget) => Transform.scale(
+              scale: a1.value,
+              child: StatefulBuilder(
+                builder: (context, setStateSB) => Dialog(
+                  insetPadding: EdgeInsets.all(10),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  backgroundColor: Color.fromARGB(232, 255, 255, 255),
+                  child: Container(
+                    height: MediaQuery.of(context).size.height * .8,
+                    child: Column(
+                      children: [
+                        Stack(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Container(
+                                    margin: EdgeInsets.only(top: 15),
+                                    child: Text(
+                                      "Notifications",
+                                      style: TextStyle(
+                                          color: Colors.black54,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold),
+                                    )),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Container(
+                                  // margin: EdgeInsets.only(left: 200),
+                                  child: IconButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      icon: Icon(Icons.close)),
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                        Expanded(
+                            flex: 1,
+                            child: Container(
+                              child: ListView.builder(
+                                itemCount: 5,
+                                itemBuilder: (context, index) {
+                                  return Container(
+                                    margin: EdgeInsets.only(
+                                        left: 10, right: 10, bottom: 10),
+                                    height: 80,
+                                    decoration: BoxDecoration(
+                                        color: Colors.black12,
+                                        borderRadius: BorderRadius.circular(8)),
+                                    child: Center(
+                                        child: Text(
+                                      "ggjh",
+                                      style: GoogleFonts.lato(
+                                          color: Colors.black54, fontSize: 18),
+                                    )),
+                                  );
+                                },
+                              ),
+                            ))
+                      ],
+                    ),
+                  ),
+                ),
+              )),
+          transitionDuration: Duration(milliseconds: 150),
+          barrierLabel: '',
+          pageBuilder: (context, animation1, animation2) {
+            return Text("page builder");
+          });
+    }
+
     accountBox() {
       return showGeneralDialog(
           context: context,
@@ -276,7 +359,9 @@ class _HomePageeState extends State<HomePagee> {
                                     splashColor: Color.fromARGB(80, 0, 0, 0),
                                     alignment: Alignment.center,
                                     iconSize: 30,
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      notification();
+                                    },
                                     icon: InkWell(
                                       splashColor: Color.fromARGB(80, 0, 0, 0),
                                       child: Container(

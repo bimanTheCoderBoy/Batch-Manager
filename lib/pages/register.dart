@@ -39,7 +39,6 @@ class _MyRegisterState extends State<Register> {
           "id": value.user!.uid,
           "email": value.user!.email,
           "notifications": [],
-          "monthlyEarning": {"Due": 0, "EME": 0, "ME": 0},
           "monthlyEarningArray": []
         });
       });

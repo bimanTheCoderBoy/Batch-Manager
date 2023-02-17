@@ -1,7 +1,7 @@
 // ignore_for_file: unrelated_type_equality_checks
 
 import 'package:animated_splash_screen/animated_splash_screen.dart';
-import 'package:batch_manager/pages/home_page.dart';
+
 import 'package:batch_manager/pages/homepage.dart';
 import 'package:batch_manager/pages/login.dart';
 import 'package:batch_manager/pages/register.dart';
@@ -18,7 +18,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:workmanager/workmanager.dart';
 import 'firebase_options.dart';
-import 'pages/home_page.dart';
+
 import 'pages/batches_page.dart';
 import 'package:flutter/services.dart';
 import 'util/route.dart';
@@ -26,6 +26,20 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:batch_manager/util/noti.dart';
 
 List<StudentItem> allStudent = [];
+List<String> mon = [
+  "Janury",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December"
+];
 mapRecords(QuerySnapshot<Map<String, dynamic>> records) async {
   var mapppedData = await records.docs.map((e) {
     return StudentItem.fromJson(e);
@@ -62,20 +76,7 @@ monthlyFees() async {
     List<MonthlyFee> account1 = allStudent[i].account;
     print(account1.length);
     List<Object> account = [];
-    List<String> mon = [
-      "Janury",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December"
-    ];
+
     bool already = false;
     for (int i = 0; i < account1.length; i++) {
       if (account1[i].month == mon[DateTime.now().month - 1] &&
@@ -145,22 +146,37 @@ monthlyFees() async {
 }
 
 earningUpdate() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   var user = FirebaseAuth.instance.currentUser;
   var earningInstance =
       await FirebaseFirestore.instance.collection('users').doc(user!.uid).get();
   List earningArray = [];
   earningArray = await earningInstance.data()?["monthlyEarningArray"];
-  var newMonth = {
-    "due": (earningArray.isNotEmpty)
-        ? (earningArray[0]?["total"] - earningArray[0]?["me"])
-        : 0,
-    "me": 0,
-    "expectedMe": 0,
-    "total": 0
-  };
-  await FirebaseFirestore.instance.collection('users').doc(user!.uid).update({
-    "monthlyEarningArray": [newMonth, ...earningArray]
-  });
+  bool check = true;
+  for (var e in earningArray) {
+    if (e['time'] ==
+        "${mon[DateTime.now().month - 1]} : ${DateTime.now().year}") {
+      check = false;
+      break;
+    }
+  }
+  if (check) {
+    var newMonth = {
+      "due": (earningArray.isNotEmpty)
+          ? (earningArray[0]["total"] - earningArray[0]["me"])
+          : 0,
+      "me": 0,
+      "expectedMe": 0,
+      "total": 0,
+      "time": "${mon[DateTime.now().month]} : ${DateTime.now().year}"
+    };
+    await FirebaseFirestore.instance.collection('users').doc(user!.uid).update({
+      "monthlyEarningArray": [newMonth, ...earningArray]
+    });
+  }
 }
 
 const fee = 'monthlyFees';
@@ -169,16 +185,26 @@ void callbackDispatcher() async {
   Workmanager().executeTask((taskName, inputData) async {
     switch (taskName) {
       case fee:
-        if (DateTime.now().day >= 1 && DateTime.now().day <= 20) {
+        if (DateTime.now().day <= 20) {
           await monthlyFees();
         }
         break;
       case monthlyearning:
-        print(
-            "working                          hjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj");
-        // if (DateTime.now().day <= 20) {
-        await earningUpdate();
-        // }
+        var month = DateTime.now().month;
+        var day = DateTime.now().day;
+        bool t27 = (month == 2);
+        bool t31 = (month == 1 ||
+            month == 3 ||
+            month == 5 ||
+            month == 7 ||
+            month == 8 ||
+            month == 10 ||
+            month == 12);
+        bool t30 = (!t27 && !t31);
+
+        if ((day == 27 && t27) || (day == 31 && t31) || (day == 30 && t30)) {
+          await earningUpdate();
+        }
         break;
       default:
     }
@@ -203,13 +229,13 @@ void main() async {
       );
 
   // await Workmanager().cancelAll();
-  // await Workmanager().registerPeriodicTask('monthlyFees', 'monthlyFees',
-  //     frequency: const Duration(days: 1),
-  //     existingWorkPolicy: ExistingWorkPolicy.replace);
-  // await Workmanager().registerPeriodicTask(monthlyearning, monthlyearning,
-  //     frequency: const Duration(minutes: 15),
-  //     existingWorkPolicy: ExistingWorkPolicy.replace);
-  await earningUpdate();
+  await Workmanager().registerPeriodicTask('monthlyFees', 'monthlyFees',
+      frequency: const Duration(days: 1),
+      existingWorkPolicy: ExistingWorkPolicy.replace);
+  await Workmanager().registerPeriodicTask(monthlyearning, monthlyearning,
+      frequency: const Duration(days: 1),
+      existingWorkPolicy: ExistingWorkPolicy.replace);
+  // await earningUpdate();
 
   // Periodic task registration
   // Workmanager().registerPeriodicTask(

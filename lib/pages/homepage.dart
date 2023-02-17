@@ -1,4 +1,6 @@
+import 'package:batch_manager/main.dart';
 import 'package:batch_manager/pages/batches_page.dart';
+import 'package:batch_manager/pages/finance.dart';
 import 'package:batch_manager/pages/student_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -21,12 +23,13 @@ class _HomePageeState extends State<HomePagee> {
   dynamic userName = "U";
   dynamic useremail = " ";
   List userNotifications = [];
+
   var earningDetails = {
     "MonthlyEarning": 0,
     "Due": 0,
     "ExpectedME": 0,
     "Total": 0,
-    "Parcentage": 0.1
+    "Parcentage": 0.0
   };
   load() async {
     user = FirebaseAuth.instance.currentUser;
@@ -48,33 +51,46 @@ class _HomePageeState extends State<HomePagee> {
         .get();
     studentInstance.docs.map(
       (e) {
-        if (e.data()["account"]?[0]?["isPaid"] ?? false == true) {
-          me += e.data()["account"]?[0]?["dueMoney"] ?? 0;
-        }
+        if (e.data()["account"].isNotEmpty) {
+          if (e.data()["account"]?[0]?["isPaid"] ?? false == true) {
+            me += e.data()["account"]?[0]?["dueMoney"] ?? 0;
+          }
 
-        expectedMe += e.data()["account"]?[0]?["dueMoney"] ?? 0;
+          expectedMe += e.data()["account"]?[0]?["dueMoney"] ?? 0;
+        }
         return ({});
       },
     ).toList();
     earningDetails["MonthlyEarning"] = await me;
     earningDetails["ExpectedME"] = await expectedMe;
     earningDetails["Total"] = await earningDetails["Due"]! + expectedMe as int;
-    earningDetails["Parcentage"] = await (me / earningDetails["Total"]) * 100;
+    earningDetails["Parcentage"] = await (me /
+            ((earningDetails["Total"] == 0) ? 1 : earningDetails["Total"])) *
+        100;
     double tt = earningDetails["Parcentage"] as double;
 
     earningDetails["Parcentage"] = tt.toInt();
-    if (userEarning.length >= 1) {
+    if (userEarning.isNotEmpty) {
       userEarning[0] = {
-        "due": earningDetails["Due"],
+        "due": userEarning[0]["due"],
         "expectedMe": earningDetails["ExpectedME"],
         "me": earningDetails["MonthlyEarning"],
-        "total": earningDetails["Total"]
+        "total": earningDetails["Total"],
+        "time": userEarning[0]["time"]
       };
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user!.uid)
-          .update({"monthlyEarningArray": userEarning});
+    } else {
+      userEarning.add({
+        "due": 0,
+        "expectedMe": earningDetails["ExpectedME"],
+        "me": earningDetails["MonthlyEarning"],
+        "total": earningDetails["Total"],
+        "time": "${mon[DateTime.now().month - 1]} : ${DateTime.now().year}"
+      });
     }
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .update({"monthlyEarningArray": userEarning});
 
     setState(() {
       userName = userName;
@@ -417,7 +433,7 @@ class _HomePageeState extends State<HomePagee> {
                       alignment: Alignment.topLeft,
                       height: 100,
                       child: Text(
-                        "'Welcome\nTo Batch Manager'",
+                        "'Welcome\nTo Chemia Galaxy'",
                         style: GoogleFonts.hubballi(
                             fontSize: 30,
                             fontWeight: FontWeight.w900,
@@ -737,7 +753,16 @@ class _HomePageeState extends State<HomePagee> {
                                                 Color.fromARGB(80, 0, 0, 0),
                                             alignment: Alignment.center,
                                             iconSize: 47,
-                                            onPressed: () {},
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute<void>(
+                                                  builder:
+                                                      (BuildContext context) =>
+                                                          const Finance(),
+                                                ),
+                                              );
+                                            },
                                             icon: InkWell(
                                               splashColor:
                                                   Color.fromARGB(80, 0, 0, 0),

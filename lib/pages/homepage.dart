@@ -20,16 +20,67 @@ class _HomePageeState extends State<HomePagee> {
   var user;
   dynamic userName = "U";
   dynamic useremail = " ";
+  List userNotifications = [];
+  var earningDetails = {
+    "MonthlyEarning": 0,
+    "Due": 0,
+    "ExpectedME": 0,
+    "Total": 0,
+    "Parcentage": 0.1
+  };
   load() async {
     user = FirebaseAuth.instance.currentUser;
-    userName = await FirebaseFirestore.instance
+    var userInstance = await FirebaseFirestore.instance
         .collection('users')
         .doc(user!.uid)
         .get();
-    userName = await userName.data()?['name'];
+    userName = await userInstance.data()?['name'];
+    userNotifications = await userInstance.data()?['notifications'];
+    List userEarning = await userInstance.data()?['monthlyEarningArray'];
+    earningDetails["Due"] = 0;
+    dynamic me = 0;
+    dynamic expectedMe = 0;
+    List students = [];
+    var studentInstance = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .collection('student')
+        .get();
+    studentInstance.docs.map(
+      (e) {
+        if (e.data()["account"]?[0]?["isPaid"] ?? false == true) {
+          me += e.data()["account"]?[0]?["dueMoney"] ?? 0;
+        }
+
+        expectedMe += e.data()["account"]?[0]?["dueMoney"] ?? 0;
+        return ({});
+      },
+    ).toList();
+    earningDetails["MonthlyEarning"] = await me;
+    earningDetails["ExpectedME"] = await expectedMe;
+    earningDetails["Total"] = await earningDetails["Due"]! + expectedMe as int;
+    earningDetails["Parcentage"] = await (me / earningDetails["Total"]) * 100;
+    double tt = earningDetails["Parcentage"] as double;
+
+    earningDetails["Parcentage"] = tt.toInt();
+    if (userEarning.length >= 1) {
+      userEarning[0] = {
+        "due": earningDetails["Due"],
+        "expectedMe": earningDetails["ExpectedME"],
+        "me": earningDetails["MonthlyEarning"],
+        "total": earningDetails["Total"]
+      };
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user!.uid)
+          .update({"monthlyEarningArray": userEarning});
+    }
+
     setState(() {
       userName = userName;
       useremail = user.email;
+      userNotifications = userNotifications;
+      earningDetails = earningDetails;
     });
   }
 
@@ -121,21 +172,61 @@ class _HomePageeState extends State<HomePagee> {
                             flex: 1,
                             child: Container(
                               child: ListView.builder(
-                                itemCount: 5,
+                                itemCount: userNotifications.length,
                                 itemBuilder: (context, index) {
                                   return Container(
                                     margin: EdgeInsets.only(
                                         left: 10, right: 10, bottom: 10),
                                     height: 80,
                                     decoration: BoxDecoration(
-                                        color: Colors.black12,
+                                        color:
+                                            Color.fromARGB(85, 255, 165, 165),
                                         borderRadius: BorderRadius.circular(8)),
-                                    child: Center(
-                                        child: Text(
-                                      "ggjh",
-                                      style: GoogleFonts.lato(
-                                          color: Colors.black54, fontSize: 18),
-                                    )),
+                                    child: Column(
+                                      children: [
+                                        Expanded(
+                                          flex: 1,
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 15, right: 15),
+                                            child: SingleChildScrollView(
+                                              scrollDirection: Axis.horizontal,
+                                              child: Center(
+                                                  child: Text(
+                                                "${userNotifications[index]['body']}",
+                                                style: GoogleFonts.lato(
+                                                    color: Color.fromARGB(
+                                                        160, 0, 0, 0),
+                                                    fontSize: 16),
+                                              )),
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                              left: 10, right: 10, bottom: 5),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            mainAxisSize: MainAxisSize.max,
+                                            children: [
+                                              Text(
+                                                  "${userNotifications[index]['time']}",
+                                                  style: GoogleFonts.lato(
+                                                      color: Color.fromARGB(
+                                                          145, 0, 0, 0),
+                                                      fontSize: 12)),
+                                              Text(
+                                                  "${userNotifications[index]['date']}",
+                                                  style: GoogleFonts.lato(
+                                                      color: Color.fromARGB(
+                                                          145, 0, 0, 0),
+                                                      fontSize: 12))
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    ),
                                   );
                                 },
                               ),
@@ -455,7 +546,8 @@ class _HomePageeState extends State<HomePagee> {
                                       animationDuration: 2000,
                                       radius: 90,
                                       lineWidth: 10,
-                                      percent: 0.8,
+                                      percent:
+                                          (earningDetails['Parcentage']! / 100),
                                       progressColor:
                                           Color.fromARGB(255, 206, 137, 137),
                                       backgroundColor:
@@ -463,7 +555,7 @@ class _HomePageeState extends State<HomePagee> {
                                       circularStrokeCap:
                                           CircularStrokeCap.round,
                                       center: Text(
-                                        "80%",
+                                        "${(earningDetails['Parcentage'])}%",
                                         style: GoogleFonts.hubballi(
                                             fontSize: 30,
                                             fontWeight: FontWeight.bold,
@@ -496,7 +588,7 @@ class _HomePageeState extends State<HomePagee> {
                                           height: 10,
                                         ),
                                         Text(
-                                          "2005",
+                                          "₹ ${earningDetails["MonthlyEarning"]}",
                                           style: GoogleFonts.lato(
                                               fontSize: 20,
                                               fontWeight: FontWeight.bold,
@@ -533,7 +625,7 @@ class _HomePageeState extends State<HomePagee> {
                                               color: Colors.black54),
                                         ),
                                         Text(
-                                          "20045",
+                                          "₹ ${earningDetails["Due"]}",
                                           style: GoogleFonts.lato(
                                               fontSize: 20,
                                               fontWeight: FontWeight.bold,
@@ -554,7 +646,7 @@ class _HomePageeState extends State<HomePagee> {
                                               color: Colors.black54),
                                         ),
                                         Text(
-                                          "2555",
+                                          "₹ ${earningDetails["ExpectedME"]}",
                                           style: GoogleFonts.lato(
                                               fontSize: 20,
                                               fontWeight: FontWeight.bold,
@@ -575,7 +667,7 @@ class _HomePageeState extends State<HomePagee> {
                                               color: Colors.black54),
                                         ),
                                         Text(
-                                          "5445",
+                                          "₹ ${earningDetails["Total"]}",
                                           style: GoogleFonts.lato(
                                               fontSize: 20,
                                               fontWeight: FontWeight.bold,
@@ -819,8 +911,8 @@ class _HomePageeState extends State<HomePagee> {
                                                 Color.fromARGB(80, 0, 0, 0),
                                             alignment: Alignment.center,
                                             iconSize: 47,
-                                            onPressed: () {
-                                              Navigator.push(
+                                            onPressed: () async {
+                                              await Navigator.push(
                                                 context,
                                                 MaterialPageRoute<void>(
                                                   builder:
@@ -830,6 +922,9 @@ class _HomePageeState extends State<HomePagee> {
                                                   ),
                                                 ),
                                               );
+                                              setState(() {
+                                                load();
+                                              });
                                             },
                                             icon: InkWell(
                                               splashColor:

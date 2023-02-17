@@ -22,6 +22,8 @@ import 'pages/home_page.dart';
 import 'pages/batches_page.dart';
 import 'package:flutter/services.dart';
 import 'util/route.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:batch_manager/util/noti.dart';
 
 List<StudentItem> allStudent = [];
 mapRecords(QuerySnapshot<Map<String, dynamic>> records) async {
@@ -121,18 +123,62 @@ monthlyFees() async {
       "account": account
     });
   }
+  MyNotification myNotification = MyNotification();
+  await myNotification.initializeNotifications();
+  await myNotification.sendNOtifications(
+      'Data Update', "Student data updated successfuly");
+  var notificationInstance =
+      await FirebaseFirestore.instance.collection('users').doc(user!.uid).get();
+  List notificationArray = [];
+  notificationArray = notificationInstance.data()?["notifications"];
+  var newNotification = {
+    "body": "Student data updated successfuly",
+    "date": DateTime.now().toLocal().toString().substring(0, 10),
+    "time": "${DateTime.now().hour}:${DateTime.now().minute}"
+  };
+  notificationArray = [newNotification, ...notificationArray];
+  // notificationArray.add(newNotification);
+  await FirebaseFirestore.instance
+      .collection('users')
+      .doc(user.uid)
+      .update({'notifications': notificationArray});
 }
 
-// scheduledTask.cancel();
-// @pragma(
-//     'vm:entry-point') // Mandatory if the App is obfuscated or using Flutter 3.1+
+earningUpdate() async {
+  var user = FirebaseAuth.instance.currentUser;
+  var earningInstance =
+      await FirebaseFirestore.instance.collection('users').doc(user!.uid).get();
+  List earningArray = [];
+  earningArray = await earningInstance.data()?["monthlyEarningArray"];
+  var newMonth = {
+    "due": (earningArray.isNotEmpty)
+        ? (earningArray[0]?["total"] - earningArray[0]?["me"])
+        : 0,
+    "me": 0,
+    "expectedMe": 0,
+    "total": 0
+  };
+  await FirebaseFirestore.instance.collection('users').doc(user!.uid).update({
+    "monthlyEarningArray": [newMonth, ...earningArray]
+  });
+}
+
 const fee = 'monthlyFees';
+const monthlyearning = 'monthlyearning';
 void callbackDispatcher() async {
   Workmanager().executeTask((taskName, inputData) async {
     switch (taskName) {
       case fee:
-        if (DateTime.now().day >= 1 && DateTime.now().day <= 20)
+        if (DateTime.now().day >= 1 && DateTime.now().day <= 20) {
           await monthlyFees();
+        }
+        break;
+      case monthlyearning:
+        print(
+            "working                          hjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj");
+        // if (DateTime.now().day <= 20) {
+        await earningUpdate();
+        // }
         break;
       default:
     }
@@ -157,9 +203,13 @@ void main() async {
       );
 
   // await Workmanager().cancelAll();
-  await Workmanager().registerPeriodicTask('monthlyFees', 'monthlyFees',
-      frequency: const Duration(days: 1),
-      existingWorkPolicy: ExistingWorkPolicy.replace);
+  // await Workmanager().registerPeriodicTask('monthlyFees', 'monthlyFees',
+  //     frequency: const Duration(days: 1),
+  //     existingWorkPolicy: ExistingWorkPolicy.replace);
+  // await Workmanager().registerPeriodicTask(monthlyearning, monthlyearning,
+  //     frequency: const Duration(minutes: 15),
+  //     existingWorkPolicy: ExistingWorkPolicy.replace);
+  await earningUpdate();
 
   // Periodic task registration
   // Workmanager().registerPeriodicTask(
@@ -178,6 +228,9 @@ void main() async {
 }
 
 final navgatorKey = GlobalKey<NavigatorState>();
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 class MyApp extends StatelessWidget {
   MyApp({super.key});

@@ -7,17 +7,21 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import '../util/route.dart';
 
-class Register extends StatefulWidget {
-  const Register({Key? key}) : super(key: key);
+class StuRegister extends StatefulWidget {
+  const StuRegister({Key? key}) : super(key: key);
 
   @override
   _MyRegisterState createState() => _MyRegisterState();
 }
 
-class _MyRegisterState extends State<Register> {
+class _MyRegisterState extends State<StuRegister> {
+  var _teacheruid = TextEditingController();
+  var _batch = TextEditingController();
   var _nameCon = TextEditingController();
   var _emailCon = TextEditingController();
   var _passCon = TextEditingController();
+  var _number = TextEditingController();
+
   signUp() async {
     showDialog(
         context: context,
@@ -26,24 +30,41 @@ class _MyRegisterState extends State<Register> {
             child: CircularProgressIndicator(),
           );
         }));
+
     try {
       await FirebaseAuth.instance
           .createUserWithEmailAndPassword(
               email: _emailCon.text.trim(), password: _passCon.text.trim())
           .then((value) async {
         FirebaseFirestore.instance
-            .collection('users')
+            .collection('student_users')
             .doc(value.user!.uid)
             .set({
           "name": _nameCon.text.trim(),
-          "isTeacher": true,
           "id": value.user!.uid,
           "email": value.user!.email,
-          "notifications": [],
-          "monthlyEarningArray": []
+          "teacherId": _teacheruid.text.trim(),
+          "batch": _batch.text.trim(),
         });
-        // await load();
+
+        // under
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(_teacheruid.text.trim())
+            .collection("student")
+            .doc(value.user!.uid)
+            .set({
+          "name": _nameCon.text.trim(),
+          "id": value.user!.uid,
+          "batch": _batch.text.trim(),
+          "number":
+              int.parse(_number.text.trim() == "" ? "0" : _number.text.trim()),
+          "account": [],
+          "balance": 0
+        });
       });
+
+      // await load();
     } catch (e) {
       Fluttertoast.showToast(
           msg: "something went wrong!",
@@ -56,6 +77,8 @@ class _MyRegisterState extends State<Register> {
       _emailCon.clear();
       _nameCon.clear();
       _passCon.clear();
+      _batch.clear();
+      _teacheruid.clear();
     }
     navgatorKey.currentState!.popUntil((route) => route.isFirst);
   }
@@ -95,6 +118,58 @@ class _MyRegisterState extends State<Register> {
                         children: [
                           TextField(
                             textInputAction: TextInputAction.next,
+                            controller: _teacheruid,
+                            style: TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide(
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                hintText: "Teacher UID",
+                                hintStyle: TextStyle(color: Colors.white),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                )),
+                          ),
+                          SizedBox(
+                            height: 30,
+                          ),
+                          TextField(
+                            textInputAction: TextInputAction.next,
+                            controller: _batch,
+                            style: TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide(
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                hintText: "Batch",
+                                hintStyle: TextStyle(color: Colors.white),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                )),
+                          ),
+                          SizedBox(
+                            height: 30,
+                          ),
+                          TextField(
+                            textInputAction: TextInputAction.next,
                             controller: _nameCon,
                             style: TextStyle(color: Colors.white),
                             decoration: InputDecoration(
@@ -120,6 +195,7 @@ class _MyRegisterState extends State<Register> {
                             height: 30,
                           ),
                           TextField(
+                            keyboardType: TextInputType.emailAddress,
                             controller: _emailCon,
                             textInputAction: TextInputAction.next,
                             style: TextStyle(color: Colors.white),
@@ -137,6 +213,33 @@ class _MyRegisterState extends State<Register> {
                                   ),
                                 ),
                                 hintText: "Email",
+                                hintStyle: TextStyle(color: Colors.white),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                )),
+                          ),
+                          SizedBox(
+                            height: 30,
+                          ),
+                          TextField(
+                            keyboardType: TextInputType.number,
+                            controller: _number,
+                            textInputAction: TextInputAction.next,
+                            style: TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide(
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                hintText: "Number",
                                 hintStyle: TextStyle(color: Colors.white),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),

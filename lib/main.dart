@@ -5,6 +5,7 @@ import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:batch_manager/pages/homepage.dart';
 import 'package:batch_manager/pages/login.dart';
 import 'package:batch_manager/pages/register.dart';
+import 'package:batch_manager/pages/studentHome.dart';
 import 'package:batch_manager/pages/student_page.dart';
 import 'package:batch_manager/util/monthlyFee.dart';
 import 'package:batch_manager/util/student.dart';
@@ -15,6 +16,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:workmanager/workmanager.dart';
 import 'firebase_options.dart';
@@ -24,6 +26,8 @@ import 'package:flutter/services.dart';
 import 'util/route.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:batch_manager/util/noti.dart';
+
+import 'util/student_util.dart';
 
 List<StudentItem> allStudent = [];
 List<String> mon = [
@@ -213,6 +217,7 @@ void callbackDispatcher() async {
   });
 }
 
+bool isTeacher = false;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -229,12 +234,6 @@ void main() async {
       );
 
   // await Workmanager().cancelAll();
-  await Workmanager().registerPeriodicTask('monthlyFees', 'monthlyFees',
-      frequency: const Duration(days: 1),
-      existingWorkPolicy: ExistingWorkPolicy.replace);
-  await Workmanager().registerPeriodicTask(monthlyearning, monthlyearning,
-      frequency: const Duration(days: 1),
-      existingWorkPolicy: ExistingWorkPolicy.replace);
   // await earningUpdate();
 
   // Periodic task registration
@@ -285,20 +284,182 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
   const Home({super.key});
+
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  load() async {
+    var user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      var userInstance = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      if ((userInstance.data() != null &&
+          userInstance.data()!["isTeacher"] == true &&
+          StuUtill.isStudent == true)) {
+        FirebaseAuth.instance.signOut();
+        return Future.error(Exception("error signing"));
+      } else if ((userInstance.data() != null &&
+          userInstance.data()!["isTeacher"] == true)) {
+        setState(() {
+          isTeacher = true;
+          StuUtill.isStudent = false;
+        });
+      } else {
+        setState(() {
+          StuUtill.isStudent = true;
+        });
+      }
+    }
+
+    if (isTeacher) {
+      await Workmanager().registerPeriodicTask('monthlyFees', 'monthlyFees',
+          frequency: const Duration(days: 1),
+          existingWorkPolicy: ExistingWorkPolicy.replace);
+      await Workmanager().registerPeriodicTask(monthlyearning, monthlyearning,
+          frequency: const Duration(days: 1),
+          existingWorkPolicy: ExistingWorkPolicy.replace);
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    load();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
+          // FirebaseAuth.instance.signOut();
+
           if (snapshot.hasData) {
-            return HomePagee();
+            return (isTeacher && !StuUtill.isStudent) ? HomePagee() : StuHome();
           } else {
-            return Login();
+            return CheckStudentTeacher();
           }
         });
+  }
+}
+
+class CheckStudentTeacher extends StatelessWidget {
+  const CheckStudentTeacher({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height,
+      decoration: BoxDecoration(
+          gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xffDEC39E), Color(0xffA4BED0)])),
+      child: Material(
+          color: Colors.transparent,
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              SafeArea(
+                child: Container(
+                  padding: EdgeInsets.only(top: 20),
+                  child: Text(
+                    "Are you a teacher or a student ?",
+                    style: GoogleFonts.lato(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        color: Colors.black87),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Center(
+                  child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          splashColor: Colors.black12,
+                          highlightColor: Colors.black12,
+                          iconSize: 100,
+                          onPressed: () {
+                            StuUtill.isStudent = false;
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute<void>(
+                                builder: (BuildContext context) =>
+                                    const Login(),
+                              ),
+                            );
+                          },
+                          icon: Container(
+                            clipBehavior: Clip.hardEdge,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10000),
+                                boxShadow: [
+                                  BoxShadow(
+                                      color: Colors.grey,
+                                      blurRadius: 13,
+                                      spreadRadius: 7)
+                                ]),
+                            child: Image.asset(
+                              "assets/images/teacherIcon.png",
+                              height: 100,
+                            ),
+                          ),
+                        ),
+                        Center(
+                          child: Text("Teacher"),
+                        ),
+                        SizedBox(
+                          height: 30,
+                        ),
+                        IconButton(
+                          splashColor: Colors.black12,
+                          highlightColor: Colors.black12,
+                          iconSize: 100,
+                          onPressed: () {
+                            StuUtill.isStudent = true;
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute<void>(
+                                builder: (BuildContext context) =>
+                                    const Login(),
+                              ),
+                            );
+                          },
+                          icon: Container(
+                            clipBehavior: Clip.hardEdge,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10000),
+                                boxShadow: [
+                                  BoxShadow(
+                                      color: Colors.grey,
+                                      blurRadius: 13,
+                                      spreadRadius: 7)
+                                ]),
+                            child: Image.asset(
+                              "assets/images/stuIcon.png",
+                            ),
+                          ),
+                        ),
+                        Center(
+                          child: Text("Student"),
+                        )
+                      ]),
+                ),
+              ),
+            ],
+          )),
+    );
   }
 }
 

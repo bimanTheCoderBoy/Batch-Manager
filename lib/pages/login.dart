@@ -1,5 +1,8 @@
 import 'package:batch_manager/main.dart';
 import 'package:batch_manager/pages/forgot.dart';
+import 'package:batch_manager/pages/register.dart';
+import 'package:batch_manager/pages/stuRegister.dart';
+import 'package:batch_manager/util/student_util.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -27,8 +30,13 @@ class _MyLoginState extends State<Login> {
           );
         }));
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: _emailCon.text.trim(), password: _passCon.text.trim());
+      await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+              email: _emailCon.text.trim(), password: _passCon.text.trim())
+          .then((value) async {
+        // await load();
+        navgatorKey.currentState!.popUntil((route) => route.isFirst);
+      });
     } catch (e) {
       print(e);
       Fluttertoast.showToast(
@@ -41,6 +49,7 @@ class _MyLoginState extends State<Login> {
           fontSize: 16.0);
       _emailCon.clear();
       _passCon.clear();
+      navgatorKey.currentState!.popUntil((route) => route.isFirst);
     }
 
     //     .then((value) {
@@ -52,8 +61,6 @@ class _MyLoginState extends State<Login> {
     //   _emailCon.clear();
     //   _passCon.clear();
     // });
-
-    navgatorKey.currentState!.popUntil((route) => route.isFirst);
   }
 
   @override
@@ -87,6 +94,7 @@ class _MyLoginState extends State<Login> {
                       child: Column(
                         children: [
                           TextField(
+                            keyboardType: TextInputType.emailAddress,
                             textInputAction: TextInputAction.next,
                             controller: _emailCon,
                             style: TextStyle(color: Colors.black),
@@ -149,7 +157,23 @@ class _MyLoginState extends State<Login> {
                             children: [
                               TextButton(
                                 onPressed: () {
-                                  Navigator.pushNamed(context, Routte.register);
+                                  if (StuUtill.isStudent) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute<void>(
+                                        builder: (BuildContext context) =>
+                                            const StuRegister(),
+                                      ),
+                                    );
+                                  } else {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute<void>(
+                                        builder: (BuildContext context) =>
+                                            const Register(),
+                                      ),
+                                    );
+                                  }
                                 },
                                 child: Text(
                                   'Sign Up',

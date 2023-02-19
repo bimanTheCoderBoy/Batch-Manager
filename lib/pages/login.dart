@@ -157,7 +157,7 @@ class _MyLoginState extends State<Login> {
                             children: [
                               TextButton(
                                 onPressed: () {
-                                  if (StuUtill.isStudent) {
+                                  if (StuUtill.isStudent == 1) {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute<void>(

@@ -8,6 +8,7 @@ class StudentItem {
   late List<MonthlyFee> account = [];
   late int balance;
   late var id;
+
   StudentItem.empty();
   StudentItem(
       {required this.name,

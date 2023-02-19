@@ -803,6 +803,7 @@ class _BatchListState extends State<BatchList> {
                                                                               deleteBatch(document.id);
                                                                               for (var element in studentItems) {
                                                                                 if (element.batch == document['name']) {
+                                                                                  FirebaseFirestore.instance.collection('student_users').doc(element.id).delete();
                                                                                   FirebaseFirestore.instance.collection('users').doc(user.uid).collection("student").doc(element.id).delete();
                                                                                 }
                                                                               }

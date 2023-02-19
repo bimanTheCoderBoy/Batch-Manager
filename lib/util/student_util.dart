@@ -1,3 +1,3 @@
 class StuUtill {
-  static bool isStudent = false;
+  static int isStudent = 2;
 }

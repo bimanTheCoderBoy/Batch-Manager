@@ -1,4 +1,5 @@
 import 'package:batch_manager/main.dart';
+import 'package:batch_manager/pages/anouncement.dart';
 import 'package:batch_manager/pages/batches_page.dart';
 import 'package:batch_manager/pages/finance.dart';
 import 'package:batch_manager/pages/student_page.dart';
@@ -542,7 +543,7 @@ class _HomePageeState extends State<HomePagee> {
                           height: 250,
                           margin: EdgeInsets.only(left: 15, right: 15, top: 30),
                           decoration: const BoxDecoration(
-                              color: Colors.white38,
+                              color: Colors.white60,
                               borderRadius: BorderRadius.only(
                                 topRight: Radius.circular(70),
                                 topLeft: Radius.circular(10),
@@ -817,7 +818,16 @@ class _HomePageeState extends State<HomePagee> {
                                                 Color.fromARGB(80, 0, 0, 0),
                                             alignment: Alignment.center,
                                             iconSize: 47,
-                                            onPressed: () {},
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute<void>(
+                                                  builder:
+                                                      (BuildContext context) =>
+                                                          const Anouncement(),
+                                                ),
+                                              );
+                                            },
                                             icon: InkWell(
                                               splashColor:
                                                   Color.fromARGB(80, 0, 0, 0),

@@ -1,4 +1,4 @@
-// ignore_for_file: unrelated_type_equality_checks
+// ignore_for_file: unrelated_type_equality_checks, prefer_const_constructors
 
 import 'package:animated_splash_screen/animated_splash_screen.dart';
 
@@ -217,7 +217,7 @@ void callbackDispatcher() async {
   });
 }
 
-bool isTeacher = false;
+int isTeacher = 2;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -307,17 +307,18 @@ class _HomeState extends State<Home> {
       } else if ((userInstance.data() != null &&
           userInstance.data()!["isTeacher"] == true)) {
         setState(() {
-          isTeacher = true;
-          StuUtill.isStudent = false;
+          isTeacher = 1;
+          StuUtill.isStudent = 0;
         });
       } else {
         setState(() {
-          StuUtill.isStudent = true;
+          isTeacher = 0;
+          StuUtill.isStudent = 1;
         });
       }
     }
 
-    if (isTeacher) {
+    if (isTeacher == 1 && StuUtill.isStudent == 0) {
       await Workmanager().registerPeriodicTask('monthlyFees', 'monthlyFees',
           frequency: const Duration(days: 1),
           existingWorkPolicy: ExistingWorkPolicy.replace);
@@ -342,7 +343,22 @@ class _HomeState extends State<Home> {
           // FirebaseAuth.instance.signOut();
 
           if (snapshot.hasData) {
-            return (isTeacher && !StuUtill.isStudent) ? HomePagee() : StuHome();
+            return (isTeacher == 2 || StuUtill.isStudent == 2)
+                ? Container(
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width,
+                    decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Color(0xffDEC39E), Color(0xffA4BED0)])),
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                : (isTeacher == 1 && StuUtill.isStudent == 0)
+                    ? HomePagee()
+                    : StuHome();
           } else {
             return CheckStudentTeacher();
           }
@@ -391,7 +407,8 @@ class CheckStudentTeacher extends StatelessWidget {
                           highlightColor: Colors.black12,
                           iconSize: 100,
                           onPressed: () {
-                            StuUtill.isStudent = false;
+                            isTeacher = 1;
+                            StuUtill.isStudent = 0;
                             Navigator.push(
                               context,
                               MaterialPageRoute<void>(
@@ -404,7 +421,7 @@ class CheckStudentTeacher extends StatelessWidget {
                             clipBehavior: Clip.hardEdge,
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10000),
-                                boxShadow: [
+                                boxShadow: const [
                                   BoxShadow(
                                       color: Colors.grey,
                                       blurRadius: 13,
@@ -427,7 +444,8 @@ class CheckStudentTeacher extends StatelessWidget {
                           highlightColor: Colors.black12,
                           iconSize: 100,
                           onPressed: () {
-                            StuUtill.isStudent = true;
+                            StuUtill.isStudent = 1;
+                            isTeacher = 0;
                             Navigator.push(
                               context,
                               MaterialPageRoute<void>(
@@ -440,7 +458,7 @@ class CheckStudentTeacher extends StatelessWidget {
                             clipBehavior: Clip.hardEdge,
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10000),
-                                boxShadow: [
+                                boxShadow: const [
                                   BoxShadow(
                                       color: Colors.grey,
                                       blurRadius: 13,
@@ -481,7 +499,7 @@ class Splash extends StatelessWidget {
           clipBehavior: Clip.hardEdge,
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(13),
-              boxShadow: [
+              boxShadow: const [
                 BoxShadow(
                     color: Colors.black12, blurRadius: 20, spreadRadius: 2),
               ]),

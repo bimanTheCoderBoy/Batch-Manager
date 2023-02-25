@@ -5,7 +5,7 @@ class MyNotification {
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   final AndroidInitializationSettings _androidInitializationSettings =
-      AndroidInitializationSettings('app_icon');
+      AndroidInitializationSettings('logo1');
   initializeNotifications() async {
     InitializationSettings initializationSettings =
         InitializationSettings(android: _androidInitializationSettings);

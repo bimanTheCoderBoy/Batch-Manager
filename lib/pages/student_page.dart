@@ -7,6 +7,7 @@ import 'package:batch_manager/pages/student_open.dart';
 import 'package:batch_manager/util/monthlyFee.dart';
 import 'package:batch_manager/util/route.dart';
 import 'package:batch_manager/util/student.dart';
+import 'package:batch_manager/pages/batches_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -463,7 +464,7 @@ class _StudentState extends State<Student> {
                     icon: Icon(Icons.arrow_back)),
               ),
             Text(
-              widget.batch,
+              BatchList.smallString(widget.batch, number: 18),
               style: GoogleFonts.hubballi(fontSize: 25),
             ),
             if (selectedArea)
@@ -885,8 +886,11 @@ class _StudentState extends State<Student> {
                                                           studentItemsRun[index]
                                                               .account,
                                                       batch:
-                                                          studentItemsRun[index]
-                                                              .batch,
+                                                          BatchList.smallString(
+                                                              studentItemsRun[
+                                                                      index]
+                                                                  .batch,
+                                                              number: 18),
                                                       number:
                                                           studentItemsRun[index]
                                                               .number,
@@ -957,17 +961,21 @@ class _StudentState extends State<Student> {
                                                       ),
                                                     ),
                                                     Expanded(
-                                                      flex: 3,
-                                                      child: Text(
-                                                        studentItemsRun[index]
-                                                            .batch,
-                                                        style: GoogleFonts
-                                                            .hubballi(
-                                                                fontSize: 25),
+                                                      flex: 4,
+                                                      child: Center(
+                                                        child: Text(
+                                                          BatchList.smallString(
+                                                              studentItemsRun[
+                                                                      index]
+                                                                  .batch),
+                                                          style: GoogleFonts
+                                                              .hubballi(
+                                                                  fontSize: 25),
+                                                        ),
                                                       ),
                                                     ),
                                                     Expanded(
-                                                      flex: 2,
+                                                      flex: 3,
                                                       child: Text(
                                                         "₹ ${studentItemsRun[index].balance.toString()}",
                                                         style: GoogleFonts

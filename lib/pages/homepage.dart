@@ -147,7 +147,7 @@ class _HomePageeState extends State<HomePagee> {
                   insetPadding: EdgeInsets.all(10),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
-                  backgroundColor: Color.fromARGB(232, 255, 255, 255),
+                  backgroundColor: Color.fromARGB(214, 255, 255, 255),
                   child: Container(
                     height: MediaQuery.of(context).size.height * .8,
                     child: Column(
@@ -196,9 +196,12 @@ class _HomePageeState extends State<HomePagee> {
                                         left: 10, right: 10, bottom: 10),
                                     height: 80,
                                     decoration: BoxDecoration(
-                                        color:
-                                            Color.fromARGB(85, 255, 165, 165),
-                                        borderRadius: BorderRadius.circular(8)),
+                                        color: Color.fromARGB(30, 0, 0, 0),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                            color: Color.fromARGB(
+                                                255, 198, 159, 109),
+                                            width: 1)),
                                     child: Column(
                                       children: [
                                         Expanded(
@@ -540,8 +543,8 @@ class _HomePageeState extends State<HomePagee> {
                         ),
                         Row(),
                         Container(
-                          height: 250,
-                          margin: EdgeInsets.only(left: 15, right: 15, top: 30),
+                          // height: 250,
+                          margin: EdgeInsets.only(left: 15, right: 15, top: 50),
                           decoration: const BoxDecoration(
                               color: Colors.white60,
                               borderRadius: BorderRadius.only(
@@ -557,7 +560,7 @@ class _HomePageeState extends State<HomePagee> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Container(
-                                    padding: EdgeInsets.only(left: 15, top: 15),
+                                    padding: EdgeInsets.only(left: 15, top: 20),
                                     child: CircularPercentIndicator(
                                       animation: true,
                                       animationDuration: 2000,
@@ -620,7 +623,7 @@ class _HomePageeState extends State<HomePagee> {
                               Container(
                                 padding: EdgeInsets.all(15),
                                 margin: EdgeInsets.only(
-                                    left: 20, right: 19, top: 25),
+                                    left: 20, right: 19, top: 25, bottom: 20),
                                 decoration: BoxDecoration(
                                     color: Colors.black12,
                                     borderRadius: BorderRadius.only(
@@ -827,6 +830,9 @@ class _HomePageeState extends State<HomePagee> {
                                                           const Anouncement(),
                                                 ),
                                               );
+                                              setState(() {
+                                                load();
+                                              });
                                             },
                                             icon: InkWell(
                                               splashColor:
@@ -891,6 +897,9 @@ class _HomePageeState extends State<HomePagee> {
                                                           const BatchList(),
                                                 ),
                                               );
+                                              setState(() {
+                                                load();
+                                              });
                                             },
                                             icon: InkWell(
                                               splashColor:

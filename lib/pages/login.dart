@@ -1,7 +1,7 @@
 import 'package:batch_manager/main.dart';
 import 'package:batch_manager/pages/forgot.dart';
 import 'package:batch_manager/pages/register.dart';
-import 'package:batch_manager/pages/stuRegister.dart';
+
 import 'package:batch_manager/util/student_util.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -157,15 +157,7 @@ class _MyLoginState extends State<Login> {
                             children: [
                               TextButton(
                                 onPressed: () {
-                                  if (StuUtill.isStudent == 1) {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute<void>(
-                                        builder: (BuildContext context) =>
-                                            const StuRegister(),
-                                      ),
-                                    );
-                                  } else {
+                                  {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute<void>(

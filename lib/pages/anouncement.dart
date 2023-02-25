@@ -1,3 +1,5 @@
+import 'package:background_sms/background_sms.dart';
+import 'package:batch_manager/util/noti.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +7,10 @@ import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:twilio_flutter/twilio_flutter.dart';
+
+import '../util/student.dart';
 
 class Batch {
   String name = "";
@@ -21,7 +27,28 @@ class Anouncement extends StatefulWidget {
 
 class _AnouncementState extends State<Anouncement> {
   List<Batch> batches = [];
+  var user = FirebaseAuth.instance.currentUser;
   var _massage = TextEditingController();
+  List<StudentItem> students = [];
+  late TwilioFlutter twilioFlutter;
+  mapRecords(QuerySnapshot<Map<String, dynamic>> records) async {
+    var mapppedData = await records.docs.map((e) {
+      return StudentItem.fromJson(e);
+    }).toList();
+    setState(() {
+      students = mapppedData;
+    });
+  }
+
+  studentLoading() async {
+    var studentsFirebaseData = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .collection("student")
+        .get();
+    mapRecords(studentsFirebaseData);
+  }
+
   batchLoading() async {
     var user = FirebaseAuth.instance.currentUser;
     var batchInstance = await FirebaseFirestore.instance
@@ -57,40 +84,77 @@ class _AnouncementState extends State<Anouncement> {
     return nn;
   }
 
+  apiTesting() async {
+    twilioFlutter = TwilioFlutter(
+        accountSid: 'ACb643755f8f6c2cabc78898b73bddcbcb',
+        authToken: 'f76c1f5692477744eafb393b880fb8dd',
+        twilioNumber: '+12705143722');
+  }
+
   send(String massage) async {
+    int count = 0;
     bool selectedOrNot = false;
     var user = FirebaseAuth.instance.currentUser;
     for (var e in batches) {
+      if (count > 90) {
+        Fluttertoast.showToast(
+            msg: "Students greater than 90 not allowed",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 3,
+            backgroundColor: Color.fromARGB(255, 247, 109, 109),
+            textColor: Color.fromARGB(255, 226, 226, 226),
+            fontSize: 16.0);
+        break;
+      }
       if (e.value == true) {
         selectedOrNot = true;
-        var batchInstance = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user!.uid)
-            .collection('Batches')
-            .doc(e.id)
-            .get();
-        var batchArray = batchInstance.data()?["batchArray"];
-        var newm = {
-          "massage": massage,
-          "date": DateTime.now().toLocal().toString().substring(0, 10),
-          "time": "${DateTime.now().hour}:${DateTime.now().minute}"
-        };
-        if (batchArray == null) {
-          batchArray = [newm];
-        } else {
-          batchArray.add(newm);
+        for (var stu in students) {
+          if (count > 90) {
+            break;
+          }
+          if (stu.batch == e.name) {
+            count++;
+            Future.delayed(const Duration(milliseconds: 500), () async {
+              try {
+                // twilioFlutter.sendSMS(
+                //     toNumber: "+91${stu.number}", messageBody: massage);
+                await BackgroundSms.sendMessage(
+                    phoneNumber: stu.number.toString(), message: massage);
+              } catch (e) {
+                print(e);
+              }
+            });
+          }
         }
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .collection('Batches')
-            .doc(e.id)
-            .update({"batchArray": batchArray});
+
         setState(() {
           e.value = false;
         });
       }
     }
+    MyNotification myNotification = MyNotification();
+    await myNotification.initializeNotifications();
+    await myNotification.sendNOtifications(
+        'SMS Update', "SMS send to ${count} students successfuly");
+
+    var notificationInstance = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .get();
+    List notificationArray = [];
+    notificationArray = notificationInstance.data()?["notifications"];
+    var newNotification = {
+      "body": "SMS send to ${count} students successfuly",
+      "date": DateTime.now().toLocal().toString().substring(0, 10),
+      "time": "${DateTime.now().hour}:${DateTime.now().minute}"
+    };
+    notificationArray = [newNotification, ...notificationArray];
+    // notificationArray.add(newNotification);
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .update({'notifications': notificationArray});
     if (selectedOrNot) {
       Fluttertoast.showToast(
           msg: "Massage send successfuly",
@@ -115,8 +179,22 @@ class _AnouncementState extends State<Anouncement> {
   @override
   void initState() {
     // TODO: implement initState
+    apiTesting();
+    studentLoading();
     batchLoading();
+    getPermission();
     super.initState();
+  }
+
+  getPermission() async {
+    var status1 = await Permission.sms.status;
+    var status2 = await Permission.phone.status;
+    if (status1.isDenied) {
+      await Permission.sms.request();
+    }
+    if (status2.isDenied) {
+      await Permission.phone.request();
+    }
   }
 
   @override

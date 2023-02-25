@@ -1,8 +1,10 @@
+import 'package:batch_manager/main.dart';
 import 'package:batch_manager/pages/student_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 import '../firebase_options.dart';
@@ -121,6 +123,21 @@ import '../util/student.dart';
 
 class BatchList extends StatefulWidget {
   const BatchList({super.key});
+  static String smallString(String n, {int number = 7}) {
+    String nn = "";
+    int i = 0;
+
+    while (i < n.length) {
+      nn += n[i];
+      if (i == number) {
+        nn += "..";
+        break;
+      }
+      i++;
+    }
+
+    return nn;
+  }
 
   @override
   State<BatchList> createState() => _BatchListState();
@@ -188,13 +205,32 @@ class _BatchListState extends State<BatchList> {
 //addBatch  end
 
 //update data
-  updateBatch(var batch) {
-    FirebaseFirestore.instance
+  updateBatch(var batch) async {
+    var batchOldName = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .collection('Batches')
+        .doc(batch["id"])
+        .get();
+    for (var e in studentItems) {
+      if (e.batch == await batchOldName.data()!["name"]) {
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(user!.uid)
+            .collection("student")
+            .doc(e.id)
+            .update({"batch": batch["name"]});
+      }
+    }
+    await FirebaseFirestore.instance
         .collection('users')
         .doc(user.uid)
         .collection('Batches')
         .doc(batch['id'])
         .update({"name": batch['name'], "price": batch['price']});
+    setState(() {
+      stuCount(batch: batch["name"]);
+    });
   }
 
   deleteBatch(var id) async {
@@ -272,179 +308,211 @@ class _BatchListState extends State<BatchList> {
 //---------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------
 //dialogue functuon---------------------------------------------------------------
-  openDialogue({required String name, dynamic id}) => showGeneralDialog(
-      context: context,
-      transitionBuilder: (context, a1, a2, widget) => Transform.scale(
-          scale: a1.value,
-          child: Dialog(
-            insetPadding: EdgeInsets.all(25),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            child: Container(
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: Color.fromARGB(255, 255, 254, 252)),
-                child: Column(mainAxisSize: MainAxisSize.min,
-                    // mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        alignment: Alignment.center,
-                        height: 60,
-                        decoration: BoxDecoration(
-                            border: Border(
-                                bottom: BorderSide(
-                                    color: Color.fromARGB(255, 136, 4, 243),
-                                    width: 3))),
-                        child: GradientText(
-                          "Add Batch",
-                          style: GoogleFonts.hubballi(
-                              fontWeight: FontWeight.bold, fontSize: 25),
-                          colors: [
-                            Color.fromARGB(255, 240, 160, 50),
-                            Color.fromARGB(255, 34, 115, 255)
-                          ],
-                        ),
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(top: 20),
-                        padding: EdgeInsets.only(left: 10, right: 10),
-                        child: TextField(
-                          controller: batchName,
-                          textInputAction: TextInputAction.next,
-                          decoration: InputDecoration(
-                              focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
+  openDialogue(
+      {required String name,
+      dynamic id,
+      dynamic fees = "",
+      dynamic batchname = ""}) {
+    setState(() {
+      batchName.text = batchname;
+      batchPrice.text = fees;
+    });
+    return showGeneralDialog(
+        context: context,
+        transitionBuilder: (context, a1, a2, widget) => Transform.scale(
+            scale: a1.value,
+            child: Dialog(
+              insetPadding: EdgeInsets.all(25),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
+              child: Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Color.fromARGB(255, 255, 254, 252)),
+                  child: Column(mainAxisSize: MainAxisSize.min,
+                      // mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          alignment: Alignment.center,
+                          height: 60,
+                          decoration: BoxDecoration(
+                              border: Border(
+                                  bottom: BorderSide(
                                       color: Color.fromARGB(255, 136, 4, 243),
-                                      width: 1.5)),
-                              label: Text("title"),
-                              prefixIcon: Icon(
-                                Icons.book,
-                                color: Colors.grey[400],
-                              ),
-                              border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(5))),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Container(
-                        padding: EdgeInsets.only(left: 10, right: 10),
-                        child: TextField(
-                          keyboardType: TextInputType.number,
-                          onSubmitted: (value) => {
-                            if (name == "Add Batch")
-                              {
-                                addBatch(),
-                              }
-                            else if (name == "Update Batch")
-                              {
-                                updateBatch({
-                                  "name": batchName.text,
-                                  "price": int.parse(batchPrice.text),
-                                  "id": id
-                                })
-                              },
-                            Navigator.pop(context),
-                            batchName.clear(),
-                            batchPrice.clear(),
-                          },
-                          controller: batchPrice,
-                          decoration: InputDecoration(
-                              label: Text("fees"),
-                              prefixIcon: Icon(
-                                Icons.currency_rupee_sharp,
-                                color: Colors.grey[400],
-                              ),
-                              border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(5))),
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          Container(
-                            margin: EdgeInsets.only(top: 20, bottom: 20),
-                            height: 50,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      Color.fromARGB(255, 255, 255, 255),
-                                  side: BorderSide(
-                                      color: Color.fromARGB(255, 165, 165, 165),
-                                      width: 1.5),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.circular(12), // <-- Radius
-                                  )),
-                              onPressed: (() => {
-                                    batchName.clear(),
-                                    batchPrice.clear(),
-                                    Navigator.pop(context)
-                                  }),
-                              child: GradientText(
-                                "Cancel",
-                                style: GoogleFonts.hubballi(
-                                    fontWeight: FontWeight.bold, fontSize: 25),
-                                colors: [
-                                  Color.fromARGB(255, 240, 160, 50),
-                                  Color.fromARGB(255, 34, 115, 255)
-                                ],
-                              ),
-                            ),
+                                      width: 3))),
+                          child: GradientText(
+                            "$name",
+                            style: GoogleFonts.hubballi(
+                                fontWeight: FontWeight.bold, fontSize: 25),
+                            colors: [
+                              Color.fromARGB(255, 240, 160, 50),
+                              Color.fromARGB(255, 34, 115, 255)
+                            ],
                           ),
-                          Container(
-                            height: 50,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      Color.fromARGB(255, 255, 255, 255),
-                                  side: BorderSide(
-                                      color: Color.fromARGB(255, 165, 165, 165),
-                                      width: 1.5),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.circular(12), // <-- Radius
-                                  )),
-                              onPressed: (() => {
-                                    if (name == "Add Batch")
-                                      {
-                                        addBatch(),
-                                      }
-                                    else if (name == "Update Batch")
-                                      {
-                                        updateBatch({
-                                          "name": batchName.text,
-                                          "price": int.parse(
-                                              batchPrice.text == ""
-                                                  ? "0"
-                                                  : batchPrice.text),
-                                          "id": id
-                                        })
-                                      },
-                                    Navigator.pop(context),
-                                    batchName.clear(),
-                                    batchPrice.clear(),
-                                  }),
-                              child: GradientText(
-                                "Confirm",
-                                style: GoogleFonts.hubballi(
-                                    fontWeight: FontWeight.bold, fontSize: 25),
-                                colors: [
-                                  Color.fromARGB(255, 240, 160, 50),
-                                  Color.fromARGB(255, 34, 115, 255)
-                                ],
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 20),
+                          padding: EdgeInsets.only(left: 10, right: 10),
+                          child: TextField(
+                            controller: batchName,
+                            textInputAction: TextInputAction.next,
+                            decoration: InputDecoration(
+                                focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Color.fromARGB(255, 4, 135, 243),
+                                        width: 1.5)),
+                                label: Text("title"),
+                                // labelText: "hhh",
+                                // hintText: batchname,
+                                prefixIcon: Icon(
+                                  Icons.book,
+                                  color: Colors.grey[400],
+                                ),
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(5))),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Container(
+                          padding: EdgeInsets.only(left: 10, right: 10),
+                          child: TextField(
+                            keyboardType: TextInputType.number,
+                            onSubmitted: (value) => {
+                              if (name == "Add Batch")
+                                {
+                                  addBatch(),
+                                }
+                              else if (name == "Update Batch")
+                                {
+                                  updateBatch({
+                                    "name": batchName.text,
+                                    "price": int.parse(batchPrice.text),
+                                    "id": id
+                                  })
+                                },
+                              Navigator.pop(context),
+                              batchName.clear(),
+                              batchPrice.clear(),
+                            },
+                            controller: batchPrice,
+                            decoration: InputDecoration(
+                                label: Text("fees"),
+                                // hintText: "$fees",
+                                prefixIcon: Icon(
+                                  Icons.currency_rupee_sharp,
+                                  color: Colors.grey[400],
+                                ),
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(5))),
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(top: 20, bottom: 20),
+                              height: 50,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        Color.fromARGB(255, 255, 255, 255),
+                                    side: BorderSide(
+                                        color:
+                                            Color.fromARGB(255, 165, 165, 165),
+                                        width: 1.5),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          12), // <-- Radius
+                                    )),
+                                onPressed: (() => {
+                                      batchName.clear(),
+                                      batchPrice.clear(),
+                                      Navigator.pop(context)
+                                    }),
+                                child: GradientText(
+                                  "Cancel",
+                                  style: GoogleFonts.hubballi(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 25),
+                                  colors: [
+                                    Color.fromARGB(255, 240, 160, 50),
+                                    Color.fromARGB(255, 34, 115, 255)
+                                  ],
+                                ),
                               ),
                             ),
-                          )
-                        ],
-                      )
-                    ])),
-          )),
-      transitionDuration: Duration(milliseconds: 150),
-      pageBuilder: (context, animation1, animation2) {
-        return Text("page builder");
-      });
+                            Container(
+                              height: 50,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        Color.fromARGB(255, 255, 255, 255),
+                                    side: BorderSide(
+                                        color:
+                                            Color.fromARGB(255, 165, 165, 165),
+                                        width: 1.5),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          12), // <-- Radius
+                                    )),
+                                onPressed: (() => {
+                                      if (batchName.text.trim().length > 15)
+                                        {
+                                          Fluttertoast.showToast(
+                                              msg:
+                                                  "batch name should be with in 15 character!",
+                                              toastLength: Toast.LENGTH_SHORT,
+                                              gravity: ToastGravity.BOTTOM,
+                                              timeInSecForIosWeb: 4,
+                                              backgroundColor: Color.fromARGB(
+                                                  255, 255, 93, 93),
+                                              textColor: Color.fromARGB(
+                                                  255, 226, 226, 226),
+                                              fontSize: 13.0)
+                                        }
+                                      else if (name == "Add Batch")
+                                        {
+                                          addBatch(),
+                                        }
+                                      else if (name == "Update Batch")
+                                        {
+                                          updateBatch({
+                                            "name": batchName.text,
+                                            "price": int.parse(
+                                                batchPrice.text == ""
+                                                    ? "0"
+                                                    : batchPrice.text),
+                                            "id": id
+                                          })
+                                        },
+                                      Navigator.pop(context),
+                                      batchName.clear(),
+                                      batchPrice.clear(),
+                                    }),
+                                child: GradientText(
+                                  "Confirm",
+                                  style: GoogleFonts.hubballi(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 25),
+                                  colors: [
+                                    Color.fromARGB(255, 240, 160, 50),
+                                    Color.fromARGB(255, 34, 115, 255)
+                                  ],
+                                ),
+                              ),
+                            )
+                          ],
+                        )
+                      ])),
+            )),
+        transitionDuration: Duration(milliseconds: 150),
+        pageBuilder: (context, animation1, animation2) {
+          return Text("page builder");
+        });
+  }
+
 //-----------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
@@ -639,8 +707,9 @@ class _BatchListState extends State<BatchList> {
                                                                         // ],
                                                                         borderRadius: BorderRadius.circular(500)),
                                                                     child: Text(
-                                                                      document[
-                                                                          'name'],
+                                                                      BatchList.smallString(
+                                                                          document[
+                                                                              'name']),
                                                                       style: GoogleFonts
                                                                           .handlee(
                                                                         fontSize:
@@ -676,7 +745,11 @@ class _BatchListState extends State<BatchList> {
                                                                     name:
                                                                         "Update Batch",
                                                                     id: document
-                                                                        .id)
+                                                                        .id,
+                                                                    batchname:
+                                                                        "${document["name"]}",
+                                                                    fees:
+                                                                        "${document["price"]}")
                                                               },
                                                           child: Icon(
                                                             Icons.edit_note,
@@ -803,7 +876,6 @@ class _BatchListState extends State<BatchList> {
                                                                               deleteBatch(document.id);
                                                                               for (var element in studentItems) {
                                                                                 if (element.batch == document['name']) {
-                                                                                  FirebaseFirestore.instance.collection('student_users').doc(element.id).delete();
                                                                                   FirebaseFirestore.instance.collection('users').doc(user.uid).collection("student").doc(element.id).delete();
                                                                                 }
                                                                               }

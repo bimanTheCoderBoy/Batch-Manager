@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:whatsapp_bot_flutter_mobile/whatsapp_bot_flutter_mobile.dart';
 
 import '../main.dart';
 import '../util/route.dart';

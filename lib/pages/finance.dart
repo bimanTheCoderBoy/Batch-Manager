@@ -65,7 +65,7 @@ class _FinanceState extends State<Finance> {
                 itemBuilder: (context, index) {
                   return (index == 0)
                       ? Container(
-                          height: 250,
+                          // height: 250,
                           margin:
                               EdgeInsets.only(left: 10, right: 10, bottom: 15),
                           decoration: const BoxDecoration(
@@ -146,7 +146,7 @@ class _FinanceState extends State<Finance> {
                               Container(
                                 padding: EdgeInsets.all(15),
                                 margin: EdgeInsets.only(
-                                    left: 20, right: 19, top: 25),
+                                    left: 20, right: 19, top: 25, bottom: 20),
                                 decoration: BoxDecoration(
                                     color: Colors.black12,
                                     borderRadius: BorderRadius.only(

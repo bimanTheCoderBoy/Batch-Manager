@@ -5,12 +5,12 @@ import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:batch_manager/pages/homepage.dart';
 import 'package:batch_manager/pages/login.dart';
 import 'package:batch_manager/pages/register.dart';
-import 'package:batch_manager/pages/studentHome.dart';
+
 import 'package:batch_manager/pages/student_page.dart';
 import 'package:batch_manager/util/monthlyFee.dart';
 import 'package:batch_manager/util/student.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cron/cron.dart';
+import 'package:twilio_flutter/twilio_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +20,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:workmanager/workmanager.dart';
 import 'firebase_options.dart';
-
+import 'package:http/http.dart' as http;
 import 'pages/batches_page.dart';
 import 'package:flutter/services.dart';
 import 'util/route.dart';
@@ -63,7 +63,7 @@ fetchRecord(var user) async {
   return await mapRecords(studentsFirebaseData);
 }
 
-monthlyFees() async {
+monthlyFees({cc = true}) async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -128,25 +128,29 @@ monthlyFees() async {
       "account": account
     });
   }
-  MyNotification myNotification = MyNotification();
-  await myNotification.initializeNotifications();
-  await myNotification.sendNOtifications(
-      'Data Update', "Student data updated successfuly");
-  var notificationInstance =
-      await FirebaseFirestore.instance.collection('users').doc(user!.uid).get();
-  List notificationArray = [];
-  notificationArray = notificationInstance.data()?["notifications"];
-  var newNotification = {
-    "body": "Student data updated successfuly",
-    "date": DateTime.now().toLocal().toString().substring(0, 10),
-    "time": "${DateTime.now().hour}:${DateTime.now().minute}"
-  };
-  notificationArray = [newNotification, ...notificationArray];
-  // notificationArray.add(newNotification);
-  await FirebaseFirestore.instance
-      .collection('users')
-      .doc(user.uid)
-      .update({'notifications': notificationArray});
+  if (cc) {
+    MyNotification myNotification = MyNotification();
+    await myNotification.initializeNotifications();
+    await myNotification.sendNOtifications(
+        'Data Update', "Student Daily updated successfuly");
+    var notificationInstance = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .get();
+    List notificationArray = [];
+    notificationArray = notificationInstance.data()?["notifications"];
+    var newNotification = {
+      "body": "Student Daily updated successfuly",
+      "date": DateTime.now().toLocal().toString().substring(0, 10),
+      "time": "${DateTime.now().hour}:${DateTime.now().minute}"
+    };
+    notificationArray = [newNotification, ...notificationArray];
+    // notificationArray.add(newNotification);
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .update({'notifications': notificationArray});
+  }
 }
 
 earningUpdate() async {
@@ -189,9 +193,8 @@ void callbackDispatcher() async {
   Workmanager().executeTask((taskName, inputData) async {
     switch (taskName) {
       case fee:
-        if (DateTime.now().day <= 20) {
-          await monthlyFees();
-        }
+        await monthlyFees();
+
         break;
       case monthlyearning:
         var month = DateTime.now().month;
@@ -228,11 +231,19 @@ void main() async {
     statusBarColor: Colors.transparent,
   ));
   await Workmanager().initialize(
-      callbackDispatcher, // The top level function, aka callbackDispatcher
-      isInDebugMode:
-          true // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
-      );
-
+    callbackDispatcher, // The top level function, aka callbackDispatcher
+    // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
+  );
+  await Workmanager().registerPeriodicTask(
+    'monthlyFees',
+    'monthlyFees',
+    frequency: const Duration(days: 1),
+  );
+  await Workmanager().registerPeriodicTask(
+    monthlyearning,
+    monthlyearning,
+    frequency: const Duration(days: 1),
+  );
   // await Workmanager().cancelAll();
   // await earningUpdate();
 
@@ -247,7 +258,7 @@ void main() async {
   // Workmanager().cancelAll();
 //------------------------------------------------------------------------------------------------------------
 
-  // monthlyFees();
+  monthlyFees(cc: false);
 
   runApp(MyApp());
 }
@@ -317,15 +328,6 @@ class _HomeState extends State<Home> {
         });
       }
     }
-
-    if (isTeacher == 1 && StuUtill.isStudent == 0) {
-      await Workmanager().registerPeriodicTask('monthlyFees', 'monthlyFees',
-          frequency: const Duration(days: 1),
-          existingWorkPolicy: ExistingWorkPolicy.replace);
-      await Workmanager().registerPeriodicTask(monthlyearning, monthlyearning,
-          frequency: const Duration(days: 1),
-          existingWorkPolicy: ExistingWorkPolicy.replace);
-    }
   }
 
   @override
@@ -343,141 +345,11 @@ class _HomeState extends State<Home> {
           // FirebaseAuth.instance.signOut();
 
           if (snapshot.hasData) {
-            return (isTeacher == 2 || StuUtill.isStudent == 2)
-                ? Container(
-                    height: MediaQuery.of(context).size.height,
-                    width: MediaQuery.of(context).size.width,
-                    decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [Color(0xffDEC39E), Color(0xffA4BED0)])),
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  )
-                : (isTeacher == 1 && StuUtill.isStudent == 0)
-                    ? HomePagee()
-                    : StuHome();
+            return HomePagee();
           } else {
-            return CheckStudentTeacher();
+            return Login();
           }
         });
-  }
-}
-
-class CheckStudentTeacher extends StatelessWidget {
-  const CheckStudentTeacher({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height,
-      decoration: BoxDecoration(
-          gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xffDEC39E), Color(0xffA4BED0)])),
-      child: Material(
-          color: Colors.transparent,
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              SafeArea(
-                child: Container(
-                  padding: EdgeInsets.only(top: 20),
-                  child: Text(
-                    "Are you a teacher or a student ?",
-                    style: GoogleFonts.lato(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                        color: Colors.black87),
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Center(
-                  child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          splashColor: Colors.black12,
-                          highlightColor: Colors.black12,
-                          iconSize: 100,
-                          onPressed: () {
-                            isTeacher = 1;
-                            StuUtill.isStudent = 0;
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute<void>(
-                                builder: (BuildContext context) =>
-                                    const Login(),
-                              ),
-                            );
-                          },
-                          icon: Container(
-                            clipBehavior: Clip.hardEdge,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10000),
-                                boxShadow: const [
-                                  BoxShadow(
-                                      color: Colors.grey,
-                                      blurRadius: 13,
-                                      spreadRadius: 7)
-                                ]),
-                            child: Image.asset(
-                              "assets/images/teacherIcon.png",
-                              height: 100,
-                            ),
-                          ),
-                        ),
-                        Center(
-                          child: Text("Teacher"),
-                        ),
-                        SizedBox(
-                          height: 30,
-                        ),
-                        IconButton(
-                          splashColor: Colors.black12,
-                          highlightColor: Colors.black12,
-                          iconSize: 100,
-                          onPressed: () {
-                            StuUtill.isStudent = 1;
-                            isTeacher = 0;
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute<void>(
-                                builder: (BuildContext context) =>
-                                    const Login(),
-                              ),
-                            );
-                          },
-                          icon: Container(
-                            clipBehavior: Clip.hardEdge,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10000),
-                                boxShadow: const [
-                                  BoxShadow(
-                                      color: Colors.grey,
-                                      blurRadius: 13,
-                                      spreadRadius: 7)
-                                ]),
-                            child: Image.asset(
-                              "assets/images/stuIcon.png",
-                            ),
-                          ),
-                        ),
-                        Center(
-                          child: Text("Student"),
-                        )
-                      ]),
-                ),
-              ),
-            ],
-          )),
-    );
   }
 }
 
@@ -489,8 +361,8 @@ class Splash extends StatelessWidget {
     return AnimatedSplashScreen(
       splash: Container(
         decoration: BoxDecoration(
-          border:
-              Border.all(color: Color.fromARGB(143, 243, 117, 117), width: 1),
+          // border:
+          //     Border.all(color: Color.fromARGB(143, 243, 117, 117), width: 1),
           borderRadius: BorderRadius.circular(13),
         ),
         child: Container(
@@ -500,13 +372,13 @@ class Splash extends StatelessWidget {
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(13),
               boxShadow: const [
-                BoxShadow(
-                    color: Colors.black12, blurRadius: 20, spreadRadius: 2),
+                // BoxShadow(
+                //     color: Colors.white38, blurRadius: 20, spreadRadius: 2),
               ]),
           child: Image.asset(
-            "assets/images/logo.jpg",
-            scale: 3,
-            fit: BoxFit.none,
+            "assets/images/logo1.png",
+            scale: 2,
+            fit: BoxFit.cover,
           ),
         ),
       ),
@@ -514,7 +386,7 @@ class Splash extends StatelessWidget {
       nextScreen: Home(),
       splashTransition: SplashTransition.scaleTransition,
       pageTransitionType: PageTransitionType.fade,
-      backgroundColor: Color.fromARGB(192, 179, 203, 222),
+      backgroundColor: Color.fromARGB(255, 190, 164, 198),
     );
     ;
   }

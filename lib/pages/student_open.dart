@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 // import 'package:telephony/telephony.dart';
@@ -49,7 +50,19 @@ class _StudentOpenState extends State<StudentOpen> {
   void initState() {
     user = FirebaseAuth.instance.currentUser;
     dropDownBatchdata();
+    getPermission();
     super.initState();
+  }
+
+  getPermission() async {
+    var status1 = await Permission.sms.status;
+    var status2 = await Permission.phone.status;
+    if (status1.isDenied) {
+      await Permission.sms.request();
+    }
+    if (status2.isDenied) {
+      await Permission.phone.request();
+    }
   }
 
   var _studentName = TextEditingController();
@@ -76,23 +89,35 @@ class _StudentOpenState extends State<StudentOpen> {
     for (int i = 0; i < widget.account.length; i++) {
       account1.add(widget.account[i].toJson());
     }
-    FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .collection('student')
-        .doc(widget.id)
-        .update({
-      "name": _studentName.text,
-      "number": int.parse(_studentNumber.text),
-      "batch": dropdownvalue,
-      "balance": widget.balance,
-      "account": account1
-    });
-    setState(() {
-      widget.name = _studentName.text;
-      widget.number = int.parse(_studentNumber.text);
-      widget.batch = dropdownvalue;
-    });
+    try {
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('student')
+          .doc(widget.id)
+          .update({
+        "name": _studentName.text,
+        "number": int.parse(_studentNumber.text),
+        "batch": dropdownvalue,
+        "balance": widget.balance,
+        "account": account1
+      });
+      setState(() {
+        widget.name = _studentName.text;
+        widget.number = int.parse(_studentNumber.text);
+        widget.batch = dropdownvalue;
+      });
+    } catch (e) {
+      Fluttertoast.showToast(
+          msg: "Somthing went wrong",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 6,
+          backgroundColor: Color.fromARGB(215, 247, 247, 247),
+          textColor: Color.fromARGB(255, 221, 82, 82),
+          fontSize: 16.0);
+      Navigator.pop(context);
+    }
   }
 
   @override
@@ -407,7 +432,7 @@ class _StudentOpenState extends State<StudentOpen> {
         return nn;
       }
 
-      sendSMS() async {
+      _sendSMS() async {
         // final Telephony telephony = Telephony.instance;
         // if (await telephony.requestPhoneAndSmsPermissions ?? false) {
         //   await telephony.sendSmsByDefaultApp(
@@ -415,6 +440,7 @@ class _StudentOpenState extends State<StudentOpen> {
         //     message: _message.text,
         //   );
         // }
+
         var result = await BackgroundSms.sendMessage(
             phoneNumber: widget.number.toString(), message: _message.text);
         if (result == SmsStatus.sent) {
@@ -438,6 +464,13 @@ class _StudentOpenState extends State<StudentOpen> {
               fontSize: 14.0);
           print("Failed");
         }
+        setState(() {
+          smsArea = false;
+        });
+      }
+
+      sendSMS() async {
+        await _sendSMS();
       }
 
       return Row(

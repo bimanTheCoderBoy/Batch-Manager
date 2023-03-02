@@ -8,6 +8,7 @@ class StudentItem {
   late List<MonthlyFee> account = [];
   late int balance;
   late var id;
+  late var guardianNumber = null;
 
   StudentItem.empty();
   StudentItem(
@@ -16,7 +17,8 @@ class StudentItem {
       required this.batch,
       required this.account,
       required this.balance,
-      required this.id});
+      required this.id,
+      required this.guardianNumber});
 
   StudentItem.fromJson(QueryDocumentSnapshot<Map<String, dynamic>> json) {
     name = json.data()['name'];
@@ -30,6 +32,7 @@ class StudentItem {
       account = account1;
     }
     balance = json.data()['balance'];
+    guardianNumber = json.data()['guardianNumber'];
     id = json.id;
   }
   StudentItem.fromJsond(DocumentSnapshot<Map<String, dynamic>> json) {
@@ -43,6 +46,7 @@ class StudentItem {
       });
     }
     balance = json.data()?['balance'];
+    guardianNumber = json.data()?['guardianNumber'];
     id = json.id;
   }
 }

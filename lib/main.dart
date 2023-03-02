@@ -257,8 +257,8 @@ void main() async {
   // );
   // Workmanager().cancelAll();
 //------------------------------------------------------------------------------------------------------------
-
-  monthlyFees(cc: false);
+  var user = FirebaseAuth.instance.currentUser;
+  if (user != null) monthlyFees(cc: false);
 
   runApp(MyApp());
 }

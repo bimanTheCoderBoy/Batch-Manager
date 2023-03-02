@@ -1,6 +1,7 @@
 import 'package:background_sms/background_sms.dart';
 import 'package:batch_manager/util/noti.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
@@ -84,12 +85,12 @@ class _AnouncementState extends State<Anouncement> {
     return nn;
   }
 
-  apiTesting() async {
-    twilioFlutter = TwilioFlutter(
-        accountSid: 'ACb643755f8f6c2cabc78898b73bddcbcb',
-        authToken: 'f76c1f5692477744eafb393b880fb8dd',
-        twilioNumber: '+12705143722');
-  }
+  // apiTesting() async {
+  //   twilioFlutter = TwilioFlutter(
+  //       accountSid: 'ACb643755f8f6c2cabc78898b73bddcbcb',
+  //       authToken: 'f76c1f5692477744eafb393b880fb8dd',
+  //       twilioNumber: '+12705143722');
+  // }
 
   send(String massage) async {
     int count = 0;
@@ -110,6 +111,11 @@ class _AnouncementState extends State<Anouncement> {
       if (e.value == true) {
         selectedOrNot = true;
         for (var stu in students) {
+          var stuOrGuar =
+              (smsTypeValue == null) ? "Student" : smsTypeValue as String;
+          if (stuOrGuar == "Guardian" &&
+              (stu.guardianNumber == null || stu.guardianNumber == 0))
+            stuOrGuar = "Student";
           if (count > 90) {
             break;
           }
@@ -120,9 +126,23 @@ class _AnouncementState extends State<Anouncement> {
                 // twilioFlutter.sendSMS(
                 //     toNumber: "+91${stu.number}", messageBody: massage);
                 await BackgroundSms.sendMessage(
-                    phoneNumber: stu.number.toString(), message: massage);
+                    phoneNumber: (stuOrGuar == "Student")
+                        ? stu.number.toString()
+                        : stu.guardianNumber.toString(),
+                    message: massage,
+                    simSlot: int.parse(
+                        (simSlotValue == null) ? "1" : simSlotValue as String));
               } catch (e) {
                 print(e);
+
+                Fluttertoast.showToast(
+                    msg: "SMS sending Error",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIosWeb: 3,
+                    backgroundColor: Color.fromARGB(255, 247, 109, 109),
+                    textColor: Color.fromARGB(255, 226, 226, 226),
+                    fontSize: 16.0);
               }
             });
           }
@@ -179,7 +199,7 @@ class _AnouncementState extends State<Anouncement> {
   @override
   void initState() {
     // TODO: implement initState
-    apiTesting();
+    // apiTesting();
     studentLoading();
     batchLoading();
     getPermission();
@@ -197,8 +217,172 @@ class _AnouncementState extends State<Anouncement> {
     }
   }
 
+  //dropdown values
+  String? smsTypeValue;
+  String? simSlotValue;
+
   @override
   Widget build(BuildContext context) {
+    const smsType = ["Student", "Guardian"];
+    const simSlot = ["1", "2"];
+    guardianAndSlotDropDown() {
+      return Container(
+        alignment: Alignment.center,
+        padding: EdgeInsets.only(left: 10, right: 10, bottom: 10),
+        margin: EdgeInsets.only(left: 5, right: 5, bottom: 5, top: 5),
+        decoration: BoxDecoration(),
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            DropdownButtonHideUnderline(
+              child: DropdownButton2(
+                isExpanded: true,
+                hint: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Center(
+                      child: Text(
+                        'Sms Type',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Color.fromARGB(255, 255, 255, 255),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                items: smsType
+                    .map((item) => DropdownMenuItem<String>(
+                          value: item,
+                          child: Text(
+                            item,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromARGB(194, 255, 255, 255),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ))
+                    .toList(),
+                value: smsTypeValue,
+                onChanged: (value) {
+                  setState(() {
+                    smsTypeValue = value as String;
+                  });
+                },
+                icon: const Icon(
+                  Icons.arrow_forward_ios_outlined,
+                ),
+                iconSize: 10,
+                iconEnabledColor: Color.fromARGB(255, 255, 255, 255),
+                iconDisabledColor: Colors.grey,
+                buttonHeight: 40,
+                buttonWidth: 110,
+                buttonPadding: const EdgeInsets.only(left: 10, right: 10),
+                buttonDecoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(7),
+                  border: Border.all(
+                      color: Color.fromARGB(255, 233, 195, 129), width: 2),
+                  color: Color.fromARGB(14, 30, 30, 30),
+                ),
+                buttonElevation: 1,
+                itemHeight: 40,
+                itemPadding: const EdgeInsets.only(left: 14, right: 14),
+                dropdownMaxHeight: 200,
+                dropdownWidth: 110,
+                dropdownPadding: null,
+                dropdownDecoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  color: Color.fromARGB(200, 89, 89, 89),
+                ),
+                dropdownElevation: 8,
+                scrollbarRadius: const Radius.circular(40),
+                scrollbarThickness: 6,
+                scrollbarAlwaysShow: true,
+                offset: const Offset(0, 0),
+              ),
+            ),
+            DropdownButtonHideUnderline(
+              child: DropdownButton2(
+                isExpanded: true,
+                hint: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Center(
+                      child: Text(
+                        'Sim Slot',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Color.fromARGB(255, 255, 255, 255),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                items: simSlot
+                    .map((item) => DropdownMenuItem<String>(
+                          value: item,
+                          child: Text(
+                            item,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromARGB(194, 255, 255, 255),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ))
+                    .toList(),
+                value: simSlotValue,
+                onChanged: (value) {
+                  setState(() {
+                    simSlotValue = value as String;
+                  });
+                },
+                icon: const Icon(
+                  Icons.arrow_forward_ios_outlined,
+                ),
+                iconSize: 10,
+                iconEnabledColor: Color.fromARGB(255, 255, 255, 255),
+                iconDisabledColor: Colors.grey,
+                buttonHeight: 40,
+                buttonWidth: 110,
+                buttonPadding: const EdgeInsets.only(left: 10, right: 10),
+                buttonDecoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(7),
+                  border: Border.all(
+                      color: Color.fromARGB(255, 233, 195, 129), width: 2),
+                  color: Color.fromARGB(14, 30, 30, 30),
+                ),
+                buttonElevation: 1,
+                itemHeight: 40,
+                itemPadding: const EdgeInsets.only(left: 14, right: 14),
+                dropdownMaxHeight: 200,
+                dropdownWidth: 110,
+                dropdownPadding: null,
+                dropdownDecoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  color: Color.fromARGB(200, 89, 89, 89),
+                ),
+                dropdownElevation: 8,
+                scrollbarRadius: const Radius.circular(40),
+                scrollbarThickness: 6,
+                scrollbarAlwaysShow: true,
+                offset: const Offset(0, 0),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
         height: MediaQuery.of(context).size.height,
         decoration: const BoxDecoration(
@@ -225,59 +409,67 @@ class _AnouncementState extends State<Anouncement> {
                     Container(
                       margin: EdgeInsets.all(10),
                       width: MediaQuery.of(context).size.width,
-                      height: 280,
+                      // height: 280,
                       padding: EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: Colors.white70,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Container(
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                  color: Color.fromARGB(182, 73, 134, 255),
-                                  width: 2)),
-                          child: batches.length == 0
-                              ? Center(child: CircularProgressIndicator())
-                              : ListView.builder(
-                                  itemCount: batches.length,
-                                  itemBuilder: (context, index) {
-                                    return Container(
-                                      margin: const EdgeInsets.only(
-                                          left: 20,
-                                          right: 20,
-                                          bottom: 10,
-                                          top: 10),
-                                      padding:
-                                          EdgeInsets.only(left: 10, right: 10),
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(5),
-                                          border: Border.all(
-                                              color: Colors.black12, width: 2)),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: [
-                                          Text(
-                                            '${batches[index].name}',
-                                            style: TextStyle(fontSize: 16),
+                      child: Column(
+                        children: [
+                          guardianAndSlotDropDown(),
+                          Container(
+                              width: MediaQuery.of(context).size.width,
+                              height: 250,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                      color: Color.fromARGB(182, 73, 134, 255),
+                                      width: 2)),
+                              child: batches.length == 0
+                                  ? Center(child: CircularProgressIndicator())
+                                  : ListView.builder(
+                                      itemCount: batches.length,
+                                      itemBuilder: (context, index) {
+                                        return Container(
+                                          margin: const EdgeInsets.only(
+                                              left: 20,
+                                              right: 20,
+                                              bottom: 10,
+                                              top: 10),
+                                          padding: EdgeInsets.only(
+                                              left: 10, right: 10),
+                                          decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
+                                              border: Border.all(
+                                                  color: Colors.black12,
+                                                  width: 2)),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.max,
+                                            children: [
+                                              Text(
+                                                '${batches[index].name}',
+                                                style: TextStyle(fontSize: 16),
+                                              ),
+                                              Checkbox(
+                                                value: batches[index].value,
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    batches[index].value =
+                                                        value as bool;
+                                                  });
+                                                },
+                                              )
+                                            ],
                                           ),
-                                          Checkbox(
-                                            value: batches[index].value,
-                                            onChanged: (value) {
-                                              setState(() {
-                                                batches[index].value =
-                                                    value as bool;
-                                              });
-                                            },
-                                          )
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                )),
+                                        );
+                                      },
+                                    )),
+                        ],
+                      ),
                     ),
                     Container(
                       padding: EdgeInsets.all(10),

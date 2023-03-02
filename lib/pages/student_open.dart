@@ -23,6 +23,7 @@ class StudentOpen extends StatefulWidget {
   late var number;
   late var balance;
   late var batch;
+  late var guardianNumber = null;
   late List<MonthlyFee> account = [];
 
   StudentOpen(
@@ -32,7 +33,8 @@ class StudentOpen extends StatefulWidget {
       required this.account,
       required this.balance,
       required this.batch,
-      required this.number});
+      required this.number,
+      required this.guardianNumber});
 
   @override
   State<StudentOpen> createState() => _StudentOpenState();
@@ -42,6 +44,7 @@ class _StudentOpenState extends State<StudentOpen> {
   // StudentItem? itemS;
   var _message = TextEditingController();
   var user;
+
   FocusNode smsFocus = FocusNode();
   // final Telephony telephony = Telephony.instance;
   bool smsArea = false;
@@ -51,6 +54,8 @@ class _StudentOpenState extends State<StudentOpen> {
     user = FirebaseAuth.instance.currentUser;
     dropDownBatchdata();
     getPermission();
+    _guardianNumber.text =
+        (widget.guardianNumber == null) ? "0" : "${widget.guardianNumber}";
     super.initState();
   }
 
@@ -67,6 +72,7 @@ class _StudentOpenState extends State<StudentOpen> {
 
   var _studentName = TextEditingController();
   var _studentNumber = TextEditingController();
+  var _guardianNumber = TextEditingController();
   //getting list of batches
   List batches = [];
   late String dropdownvalue;
@@ -100,12 +106,14 @@ class _StudentOpenState extends State<StudentOpen> {
         "number": int.parse(_studentNumber.text),
         "batch": dropdownvalue,
         "balance": widget.balance,
+        "guardianNumber": int.parse(_guardianNumber.text),
         "account": account1
       });
       setState(() {
         widget.name = _studentName.text;
         widget.number = int.parse(_studentNumber.text);
         widget.batch = dropdownvalue;
+        widget.guardianNumber = int.parse(_guardianNumber.text);
       });
     } catch (e) {
       Fluttertoast.showToast(
@@ -120,6 +128,7 @@ class _StudentOpenState extends State<StudentOpen> {
     }
   }
 
+  String contactNumber = "Student";
   @override
   Widget build(BuildContext context) {
     var batch = widget.batch;
@@ -205,6 +214,32 @@ class _StudentOpenState extends State<StudentOpen> {
                                         label: Text("phone"),
                                         // hintText: "mobile",
                                         focusedBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: Color.fromARGB(
+                                                    255, 136, 4, 243),
+                                                width: 1.5)),
+                                        prefixIcon: Icon(
+                                          Icons.phone,
+                                          color: Color.fromARGB(
+                                              255, 140, 140, 140),
+                                        ),
+                                        border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(5))),
+                                  ),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.only(left: 10, right: 10),
+                                  margin: EdgeInsets.only(bottom: 20),
+                                  child: TextField(
+                                    onSubmitted: (value) => {},
+                                    keyboardType: TextInputType.number,
+                                    textInputAction: TextInputAction.next,
+                                    controller: _guardianNumber,
+                                    decoration: InputDecoration(
+                                        label: Text("guardian phone"),
+                                        // hintText: "mobile",
+                                        focusedBorder: const OutlineInputBorder(
                                             borderSide: BorderSide(
                                                 color: Color.fromARGB(
                                                     255, 136, 4, 243),
@@ -440,9 +475,12 @@ class _StudentOpenState extends State<StudentOpen> {
         //     message: _message.text,
         //   );
         // }
-
+        String numberSms = (contactNumber == "Student")
+            ? widget.number.toString()
+            : widget.guardianNumber.toString();
+        if (widget.guardianNumber == null) numberSms = widget.number.toString();
         var result = await BackgroundSms.sendMessage(
-            phoneNumber: widget.number.toString(), message: _message.text);
+            phoneNumber: numberSms.toString(), message: _message.text);
         if (result == SmsStatus.sent) {
           Fluttertoast.showToast(
               msg: "message sent",
@@ -473,86 +511,135 @@ class _StudentOpenState extends State<StudentOpen> {
         await _sendSMS();
       }
 
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
+      return Column(
         children: [
-          Expanded(
-              flex: 1,
-              child: Container(
-                padding: EdgeInsets.only(bottom: 20, left: 10),
-                child: Card(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25)),
-                    child: TextFormField(
-                      focusNode: smsFocus,
-                      controller: _message,
-                      textAlignVertical: TextAlignVertical.top,
-                      keyboardType: TextInputType.multiline,
-                      maxLines: 5,
-                      minLines: 1,
+          Container(
+            margin: EdgeInsets.only(right: 20, left: 20),
+            padding: EdgeInsets.only(right: 40, left: 10),
+            decoration: BoxDecoration(
+                color: Colors.black12, borderRadius: BorderRadius.circular(7)),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Radio(
+                      value: "Student",
+                      groupValue: contactNumber,
                       onChanged: (value) {
                         setState(() {
-                          if (value == "") {
-                            smsArea = false;
-                          } else {
-                            smsArea = true;
-                          }
+                          contactNumber = value.toString();
                         });
                       },
-                      decoration: InputDecoration(
-                        hintText: " type a message",
-                        contentPadding: EdgeInsets.only(
-                            left: 15, right: 10, top: 5, bottom: 5),
-                        border: InputBorder.none,
-                      ),
-                    )),
-              )),
-          Container(
-            margin: EdgeInsets.only(bottom: 20, right: 5),
-            alignment: Alignment.centerRight,
-            child: Material(
-              clipBehavior: Clip.hardEdge,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)),
-              color: Color.fromARGB(0, 255, 193, 7),
-              child: IconButton(
-                  splashColor: Color.fromARGB(80, 0, 0, 0),
-                  alignment: Alignment.center,
-                  iconSize: 50,
-                  onPressed: () {
-                    if (!smsArea)
-                      FlutterPhoneDirectCaller.callNumber(
-                          widget.number.toString());
-                    else {
-                      sendSMS();
-                      _message.clear();
-                      smsFocus.unfocus();
-                    }
-                  },
-                  icon: InkWell(
-                    splashColor: Color.fromARGB(80, 0, 0, 0),
-                    child: Container(
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                                color: Color.fromARGB(95, 70, 70, 70),
-                                blurRadius: 6,
-                                spreadRadius: 2,
-                                offset: Offset(0, 0))
-                          ],
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.circular(300)),
-                      child: Icon(
-                        (!smsArea) ? Icons.call : Icons.send,
-                        size: 28,
-                      ),
                     ),
-                  )),
+                    Text("Student")
+                  ],
+                ),
+                Row(
+                  children: [
+                    Radio(
+                      value: "Guardian",
+                      groupValue: contactNumber,
+                      onChanged: (value) {
+                        setState(() {
+                          contactNumber = value.toString();
+                        });
+                      },
+                    ),
+                    Text('Guardian')
+                  ],
+                ),
+              ],
             ),
-          )
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Expanded(
+                flex: 1,
+                child: Container(
+                  padding: EdgeInsets.only(bottom: 20, left: 10),
+                  child: Card(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25)),
+                      child: TextFormField(
+                        focusNode: smsFocus,
+                        controller: _message,
+                        textAlignVertical: TextAlignVertical.top,
+                        keyboardType: TextInputType.multiline,
+                        maxLines: 5,
+                        minLines: 1,
+                        onChanged: (value) {
+                          setState(() {
+                            if (value == "") {
+                              smsArea = false;
+                            } else {
+                              smsArea = true;
+                            }
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: " type a message",
+                          contentPadding: EdgeInsets.only(
+                              left: 15, right: 10, top: 5, bottom: 5),
+                          border: InputBorder.none,
+                        ),
+                      )),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.only(bottom: 20, right: 5),
+                alignment: Alignment.centerRight,
+                child: Material(
+                  clipBehavior: Clip.hardEdge,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)),
+                  color: Color.fromARGB(0, 255, 193, 7),
+                  child: IconButton(
+                      splashColor: Color.fromARGB(80, 0, 0, 0),
+                      alignment: Alignment.center,
+                      iconSize: 50,
+                      onPressed: () {
+                        if (!smsArea)
+                          FlutterPhoneDirectCaller.callNumber(
+                              (contactNumber == "Student")
+                                  ? widget.number.toString()
+                                  : (widget.guardianNumber == null)
+                                      ? widget.number.toString()
+                                      : widget.guardianNumber.toString());
+                        else {
+                          sendSMS();
+                          _message.clear();
+                          smsFocus.unfocus();
+                        }
+                      },
+                      icon: InkWell(
+                        splashColor: Color.fromARGB(80, 0, 0, 0),
+                        child: Container(
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                    color: Color.fromARGB(95, 70, 70, 70),
+                                    blurRadius: 6,
+                                    spreadRadius: 2,
+                                    offset: Offset(0, 0))
+                              ],
+                              color: Colors.blue,
+                              borderRadius: BorderRadius.circular(300)),
+                          child: Icon(
+                            (!smsArea) ? Icons.call : Icons.send,
+                            size: 28,
+                          ),
+                        ),
+                      )),
+                ),
+              )
+            ],
+          ),
         ],
       );
     }

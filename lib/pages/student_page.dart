@@ -128,6 +128,7 @@ class _StudentState extends State<Student> {
 
   var _studentName = TextEditingController();
   var _studentNumber = TextEditingController();
+  var _guardianNumber = TextEditingController();
   bool selectedArea = false;
   List<String> batches = [];
 
@@ -172,6 +173,8 @@ class _StudentState extends State<Student> {
       "name": _studentName.text,
       "number":
           int.parse(_studentNumber.text == "" ? "0" : _studentNumber.text),
+      "guardianNumber":
+          int.parse(_guardianNumber.text == "" ? "0" : _guardianNumber.text),
       "batch":
           (widget.batch == "Student Dashboard") ? dropdownvalue : widget.batch,
       "account": mm,
@@ -276,6 +279,32 @@ class _StudentState extends State<Student> {
                                     controller: _studentNumber,
                                     decoration: InputDecoration(
                                         label: Text("phone"),
+                                        // hintText: "mobile",
+                                        focusedBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: Color.fromARGB(
+                                                    255, 136, 4, 243),
+                                                width: 1.5)),
+                                        prefixIcon: Icon(
+                                          Icons.phone,
+                                          color: Color.fromARGB(
+                                              255, 140, 140, 140),
+                                        ),
+                                        border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(5))),
+                                  ),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.only(left: 10, right: 10),
+                                  margin: EdgeInsets.only(bottom: 20),
+                                  child: TextField(
+                                    onSubmitted: (value) => {},
+                                    keyboardType: TextInputType.number,
+                                    textInputAction: TextInputAction.next,
+                                    controller: _guardianNumber,
+                                    decoration: InputDecoration(
+                                        label: Text("guardian phone"),
                                         // hintText: "mobile",
                                         focusedBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
@@ -894,6 +923,9 @@ class _StudentState extends State<Student> {
                                                       number:
                                                           studentItemsRun[index]
                                                               .number,
+                                                      guardianNumber:
+                                                          studentItemsRun[index]
+                                                              .guardianNumber,
                                                     )),
                                           );
                                           setState(() {

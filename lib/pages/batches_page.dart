@@ -147,6 +147,7 @@ class _BatchListState extends State<BatchList> {
   var user;
   var batchName = TextEditingController();
   var batchPrice = TextEditingController();
+  var batchClass = TextEditingController();
   List<bool> del = [];
   //addBatch
   CollectionReference? batch;
@@ -196,7 +197,8 @@ class _BatchListState extends State<BatchList> {
         .add({
           'name': "${batchName.text}", // John Doe
           'price':
-              int.parse(batchPrice.text == "" ? "0" : batchPrice.text) // 42
+              int.parse(batchPrice.text == "" ? "0" : batchPrice.text), // 42
+          'class': batchClass.text
         })
         .then((value) => print("User Added"))
         .catchError((error) => print("Failed to add user: $error"));
@@ -227,7 +229,11 @@ class _BatchListState extends State<BatchList> {
         .doc(user.uid)
         .collection('Batches')
         .doc(batch['id'])
-        .update({"name": batch['name'], "price": batch['price']});
+        .update({
+      "name": batch['name'],
+      "price": batch['price'],
+      "class": batch['class']
+    });
     setState(() {
       stuCount(batch: batch["name"]);
     });
@@ -312,10 +318,12 @@ class _BatchListState extends State<BatchList> {
       {required String name,
       dynamic id,
       dynamic fees = "",
-      dynamic batchname = ""}) {
+      dynamic batchname = "",
+      dynamic clas = "ss"}) {
     setState(() {
       batchName.text = batchname;
       batchPrice.text = fees;
+      batchClass.text = clas;
     });
     return showGeneralDialog(
         context: context,
@@ -376,6 +384,31 @@ class _BatchListState extends State<BatchList> {
                           height: 20,
                         ),
                         Container(
+                          margin: EdgeInsets.only(top: 20),
+                          padding: EdgeInsets.only(left: 10, right: 10),
+                          child: TextField(
+                            controller: batchClass,
+                            textInputAction: TextInputAction.next,
+                            decoration: InputDecoration(
+                                focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Color.fromARGB(255, 4, 135, 243),
+                                        width: 1.5)),
+                                label: Text("class"),
+                                // labelText: "hhh",
+                                // hintText: batchname,
+                                prefixIcon: Icon(
+                                  Icons.book,
+                                  color: Colors.grey[400],
+                                ),
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(5))),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Container(
                           padding: EdgeInsets.only(left: 10, right: 10),
                           child: TextField(
                             keyboardType: TextInputType.number,
@@ -389,6 +422,7 @@ class _BatchListState extends State<BatchList> {
                                   updateBatch({
                                     "name": batchName.text,
                                     "price": int.parse(batchPrice.text),
+                                    "class": batchClass.text,
                                     "id": id
                                   })
                                 },
@@ -484,6 +518,7 @@ class _BatchListState extends State<BatchList> {
                                                 batchPrice.text == ""
                                                     ? "0"
                                                     : batchPrice.text),
+                                            "class": batchClass.text,
                                             "id": id
                                           })
                                         },
@@ -516,6 +551,7 @@ class _BatchListState extends State<BatchList> {
 //-----------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
+    dynamic classControll = "";
     return Material(
       // drawer: Drawer(),
       // appBar: AppBar(
@@ -556,6 +592,7 @@ class _BatchListState extends State<BatchList> {
                       QuerySnapshot querySnapshot = snapshot.data;
                       List<QueryDocumentSnapshot> listQueryDocumentSnapshot =
                           querySnapshot.docs;
+
                       return listQueryDocumentSnapshot.length == 0
                           ? Center(
                               child: Text(
@@ -734,23 +771,32 @@ class _BatchListState extends State<BatchList> {
                                                           splashFactory:
                                                               InkRipple
                                                                   .splashFactory,
-                                                          onTap: () => {
-                                                                // updateBatch(
-                                                                //   {
-                                                                //   "id": document.id,
-                                                                //   "name": "nnn",
-                                                                //   "price": 10
-                                                                // }),
-                                                                openDialogue(
-                                                                    name:
-                                                                        "Update Batch",
-                                                                    id: document
-                                                                        .id,
-                                                                    batchname:
-                                                                        "${document["name"]}",
-                                                                    fees:
-                                                                        "${document["price"]}")
-                                                              },
+                                                          onTap: () {
+                                                            // updateBatch(
+                                                            //   {
+                                                            //   "id": document.id,
+                                                            //   "name": "nnn",
+                                                            //   "price": 10
+                                                            // }),
+                                                            try {
+                                                              classControll =
+                                                                  document[
+                                                                      'class'];
+                                                            } catch (e) {
+                                                              classControll =
+                                                                  "";
+                                                            }
+                                                            openDialogue(
+                                                                name:
+                                                                    "Update Batch",
+                                                                id: document.id,
+                                                                batchname:
+                                                                    "${document["name"]}",
+                                                                fees:
+                                                                    "${document["price"]}",
+                                                                clas:
+                                                                    classControll);
+                                                          },
                                                           child: Icon(
                                                             Icons.edit_note,
                                                             size: 34,

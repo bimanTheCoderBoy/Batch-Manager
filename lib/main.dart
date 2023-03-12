@@ -1,9 +1,8 @@
-// ignore_for_file: unrelated_type_equality_checks, prefer_const_constructors
-
 import 'package:animated_splash_screen/animated_splash_screen.dart';
 
 import 'package:batch_manager/pages/homepage.dart';
 import 'package:batch_manager/pages/login.dart';
+import 'package:batch_manager/pages/notes/sendpdf/sendfile.dart';
 import 'package:batch_manager/pages/register.dart';
 
 import 'package:batch_manager/pages/student_page.dart';
@@ -23,6 +22,8 @@ import 'firebase_options.dart';
 import 'package:http/http.dart' as http;
 import 'pages/batches_page.dart';
 import 'package:flutter/services.dart';
+import 'pages/exam/exam.dart';
+import 'pages/notes/notes.dart';
 import 'util/route.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:batch_manager/util/noti.dart';
@@ -383,7 +384,7 @@ class Splash extends StatelessWidget {
         ),
       ),
       duration: 1000,
-      nextScreen: Home(),
+      nextScreen: Exam(),
       splashTransition: SplashTransition.scaleTransition,
       pageTransitionType: PageTransitionType.fade,
       backgroundColor: Color.fromARGB(255, 190, 164, 198),

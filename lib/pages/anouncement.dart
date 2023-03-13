@@ -177,7 +177,7 @@ class _AnouncementState extends State<Anouncement> {
         .update({'notifications': notificationArray});
     if (selectedOrNot) {
       Fluttertoast.showToast(
-          msg: "Massage send successfuly",
+          msg: "Massage send successfully",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 3,

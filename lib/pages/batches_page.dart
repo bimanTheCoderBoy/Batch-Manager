@@ -319,7 +319,7 @@ class _BatchListState extends State<BatchList> {
       dynamic id,
       dynamic fees = "",
       dynamic batchname = "",
-      dynamic clas = "ss"}) {
+      dynamic clas = ""}) {
     setState(() {
       batchName.text = batchname;
       batchPrice.text = fees;

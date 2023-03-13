@@ -384,7 +384,7 @@ class Splash extends StatelessWidget {
         ),
       ),
       duration: 1000,
-      nextScreen: Exam(),
+      nextScreen: Home(),
       splashTransition: SplashTransition.scaleTransition,
       pageTransitionType: PageTransitionType.fade,
       backgroundColor: Color.fromARGB(255, 190, 164, 198),

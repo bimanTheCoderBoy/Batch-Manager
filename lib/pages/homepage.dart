@@ -1,7 +1,9 @@
 import 'package:batch_manager/main.dart';
 import 'package:batch_manager/pages/anouncement.dart';
 import 'package:batch_manager/pages/batches_page.dart';
+import 'package:batch_manager/pages/exam/exam.dart';
 import 'package:batch_manager/pages/finance.dart';
+import 'package:batch_manager/pages/notes/fileMethod.dart';
 import 'package:batch_manager/pages/student_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,6 +13,8 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:themed/themed.dart';
+
+import 'notes/notes.dart';
 
 class HomePagee extends StatefulWidget {
   const HomePagee({super.key});
@@ -541,10 +545,10 @@ class _HomePageeState extends State<HomePagee> {
                             ],
                           ),
                         ),
-                        Row(),
+
                         Container(
                           // height: 250,
-                          margin: EdgeInsets.only(left: 15, right: 15, top: 50),
+                          margin: EdgeInsets.only(left: 15, right: 15, top: 25),
                           decoration: const BoxDecoration(
                               color: Colors.white60,
                               borderRadius: BorderRadius.only(
@@ -725,7 +729,94 @@ class _HomePageeState extends State<HomePagee> {
                         //   ),
                         // ),
                         Expanded(flex: 1, child: Container()),
-
+                        Container(
+                          padding: EdgeInsets.only(
+                              left: 15, right: 15, top: 8, bottom: 8),
+                          margin:
+                              EdgeInsets.only(bottom: 30, left: 20, right: 20),
+                          decoration: BoxDecoration(
+                              color: Colors.black12,
+                              borderRadius: BorderRadius.circular(10)),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Column(
+                                  children: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute<void>(
+                                            builder: (BuildContext context) =>
+                                                const Notes(),
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        height: 70,
+                                        width: 70,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white70,
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: Icon(
+                                          Icons.note_outlined,
+                                          size: 35,
+                                          color: Color.fromARGB(
+                                              255, 206, 137, 137),
+                                        ),
+                                      ),
+                                    ),
+                                    const Text(
+                                      "Notes",
+                                      style: TextStyle(
+                                          fontSize: 10,
+                                          color:
+                                              Color.fromARGB(221, 35, 34, 34)),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  children: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute<void>(
+                                            builder: (BuildContext context) =>
+                                                const Exam(),
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        height: 70,
+                                        width: 70,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white70,
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: Icon(
+                                          Icons.person,
+                                          size: 35,
+                                          color: Color.fromARGB(
+                                              255, 206, 137, 137),
+                                        ),
+                                      ),
+                                    ),
+                                    const Text(
+                                      "Exams",
+                                      style: TextStyle(
+                                          fontSize: 10,
+                                          color:
+                                              Color.fromARGB(221, 35, 34, 34)),
+                                    ),
+                                  ],
+                                )
+                              ]),
+                        ),
                         Container(
                           child: Padding(
                             padding: const EdgeInsets.only(

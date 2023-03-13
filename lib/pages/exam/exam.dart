@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:batch_manager/pages/exam/addExam.dart';
+import 'package:batch_manager/pages/exam/examMarks.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
@@ -46,6 +47,8 @@ class _ExamState extends State<Exam> {
     return nn;
   }
 
+  var contactNumber = "Student";
+  var simSlot = "1";
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -118,7 +121,15 @@ class _ExamState extends State<Exam> {
                             return TextButton(
                               style: TextButton.styleFrom(
                                   foregroundColor: Colors.black87),
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute<void>(
+                                    builder: (BuildContext context) =>
+                                        ExamMark(exam: examList[index]),
+                                  ),
+                                );
+                              },
                               child: Container(
                                 margin: EdgeInsets.only(
                                     bottom: 0, left: 10, right: 10),
@@ -206,7 +217,130 @@ class _ExamState extends State<Exam> {
                                                           182, 184, 35, 35),
                                                   elevation: 0,
                                                 ),
-                                                onPressed: () {},
+                                                onPressed: () async {
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (context) {
+                                                      return Dialog(
+                                                        insetPadding:
+                                                            EdgeInsets.only(
+                                                                left: 15,
+                                                                right: 15),
+                                                        shape: RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10)),
+                                                        child: Container(
+                                                          padding:
+                                                              EdgeInsets.all(
+                                                                  10),
+                                                          // alignment: Alignment.center,
+                                                          child: Column(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .min,
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .center,
+                                                              children: [
+                                                                Container(
+                                                                  margin: EdgeInsets
+                                                                      .only(
+                                                                          bottom:
+                                                                              20),
+                                                                  alignment:
+                                                                      Alignment
+                                                                          .center,
+                                                                  child: Text(
+                                                                    "Are you sure, you want to delete ?",
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            25,
+                                                                        fontWeight:
+                                                                            FontWeight.bold),
+                                                                  ),
+                                                                ),
+                                                                Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .spaceAround,
+                                                                  children: [
+                                                                    Container(
+                                                                      height:
+                                                                          43,
+                                                                      child:
+                                                                          ElevatedButton(
+                                                                        style: ElevatedButton.styleFrom(
+                                                                            backgroundColor: Color.fromARGB(182, 184, 35, 35),
+                                                                            side: BorderSide(color: Color.fromARGB(255, 32, 32, 32), width: 1.5),
+                                                                            shape: RoundedRectangleBorder(
+                                                                              borderRadius: BorderRadius.circular(7), // <-- Radius
+                                                                            )),
+                                                                        onPressed:
+                                                                            (() async {
+                                                                          showDialog(
+                                                                              context: context,
+                                                                              builder: ((context) {
+                                                                                return Center(
+                                                                                  child: CircularProgressIndicator(),
+                                                                                );
+                                                                              }));
+                                                                          await ExamMethods.deleteExam(
+                                                                              examList[index]);
+                                                                          Navigator.pop(
+                                                                              context);
+                                                                          setState(
+                                                                              () {
+                                                                            makingExamList();
+                                                                          });
+                                                                          Navigator.pop(
+                                                                              context);
+                                                                        }),
+                                                                        child:
+                                                                            Text(
+                                                                          "Yes",
+                                                                          style: TextStyle(
+                                                                              color: Color.fromARGB(221, 255, 255, 255),
+                                                                              fontWeight: FontWeight.bold,
+                                                                              fontSize: 20),
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                    Container(
+                                                                      height:
+                                                                          43,
+                                                                      child:
+                                                                          ElevatedButton(
+                                                                        style: ElevatedButton.styleFrom(
+                                                                            backgroundColor: Color.fromARGB(255, 255, 255, 255),
+                                                                            side: BorderSide(color: Color.fromARGB(255, 165, 165, 165), width: 1.5),
+                                                                            shape: RoundedRectangleBorder(
+                                                                              borderRadius: BorderRadius.circular(7), // <-- Radius
+                                                                            )),
+                                                                        onPressed:
+                                                                            () {
+                                                                          Navigator.pop(
+                                                                              context);
+                                                                        },
+                                                                        child:
+                                                                            Text(
+                                                                          "No",
+                                                                          style: TextStyle(
+                                                                              color: Colors.black87,
+                                                                              fontWeight: FontWeight.bold,
+                                                                              fontSize: 20),
+                                                                        ),
+                                                                      ),
+                                                                    )
+                                                                  ],
+                                                                ),
+                                                              ]),
+                                                        ),
+                                                      );
+                                                    },
+                                                  );
+                                                },
                                                 child: Container(
                                                   alignment: Alignment.center,
                                                   child: Text(
@@ -231,7 +365,206 @@ class _ExamState extends State<Exam> {
                                                           182, 73, 134, 255),
                                                   elevation: 0,
                                                 ),
-                                                onPressed: () {},
+                                                onPressed: () {
+                                                  showGeneralDialog(
+                                                      context: context,
+                                                      transitionBuilder: (context,
+                                                              a1, a2, widget) =>
+                                                          Transform.scale(
+                                                              scale: a1.value,
+                                                              child: StatefulBuilder(
+                                                                  builder: (context,
+                                                                      setStateSB) {
+                                                                return Dialog(
+                                                                  insetPadding:
+                                                                      EdgeInsets.only(
+                                                                          left:
+                                                                              15,
+                                                                          right:
+                                                                              15),
+                                                                  shape: RoundedRectangleBorder(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              10)),
+                                                                  child:
+                                                                      Container(
+                                                                    padding:
+                                                                        EdgeInsets.all(
+                                                                            10),
+                                                                    // alignment: Alignment.center,
+                                                                    child: Column(
+                                                                        mainAxisSize:
+                                                                            MainAxisSize
+                                                                                .min,
+                                                                        crossAxisAlignment:
+                                                                            CrossAxisAlignment.center,
+                                                                        children: [
+                                                                          Container(
+                                                                            margin:
+                                                                                EdgeInsets.only(bottom: 20),
+                                                                            alignment:
+                                                                                Alignment.center,
+                                                                            child:
+                                                                                Center(
+                                                                              child: Text(
+                                                                                "Select SMS Type",
+                                                                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                          Container(
+                                                                            // margin:
+                                                                            //     EdgeInsets.only(right: 20, left: 20),
+                                                                            margin:
+                                                                                EdgeInsets.only(bottom: 10),
+                                                                            padding:
+                                                                                EdgeInsets.only(right: 25, left: 10),
+                                                                            decoration:
+                                                                                BoxDecoration(color: Colors.black12, borderRadius: BorderRadius.circular(7)),
+                                                                            child:
+                                                                                Row(
+                                                                              mainAxisSize: MainAxisSize.max,
+                                                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                              children: [
+                                                                                Row(
+                                                                                  children: [
+                                                                                    Radio(
+                                                                                      value: "Student",
+                                                                                      groupValue: contactNumber,
+                                                                                      onChanged: (value) {
+                                                                                        setStateSB(() {
+                                                                                          contactNumber = value.toString();
+                                                                                        });
+                                                                                      },
+                                                                                    ),
+                                                                                    Text("Student")
+                                                                                  ],
+                                                                                ),
+                                                                                Row(
+                                                                                  children: [
+                                                                                    Radio(
+                                                                                      value: "Guardian",
+                                                                                      groupValue: contactNumber,
+                                                                                      onChanged: (value) {
+                                                                                        setStateSB(() {
+                                                                                          contactNumber = value.toString();
+                                                                                        });
+                                                                                      },
+                                                                                    ),
+                                                                                    Text('Guardian')
+                                                                                  ],
+                                                                                ),
+                                                                              ],
+                                                                            ),
+                                                                          ),
+                                                                          Container(
+                                                                            margin:
+                                                                                EdgeInsets.only(bottom: 10),
+                                                                            padding:
+                                                                                EdgeInsets.only(right: 25, left: 10),
+                                                                            decoration:
+                                                                                BoxDecoration(color: Colors.black12, borderRadius: BorderRadius.circular(7)),
+                                                                            child:
+                                                                                Row(
+                                                                              mainAxisSize: MainAxisSize.max,
+                                                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                              children: [
+                                                                                Row(
+                                                                                  children: [
+                                                                                    Radio(
+                                                                                      value: "1",
+                                                                                      groupValue: simSlot,
+                                                                                      onChanged: (value) {
+                                                                                        setStateSB(() {
+                                                                                          simSlot = value.toString();
+                                                                                        });
+                                                                                      },
+                                                                                    ),
+                                                                                    Text("Sim Slot 1")
+                                                                                  ],
+                                                                                ),
+                                                                                Row(
+                                                                                  children: [
+                                                                                    Radio(
+                                                                                      value: "2",
+                                                                                      groupValue: simSlot,
+                                                                                      onChanged: (value) {
+                                                                                        setStateSB(() {
+                                                                                          simSlot = value.toString();
+                                                                                        });
+                                                                                      },
+                                                                                    ),
+                                                                                    Text('Sim Slot 2')
+                                                                                  ],
+                                                                                ),
+                                                                              ],
+                                                                            ),
+                                                                          ),
+                                                                          Row(
+                                                                            mainAxisAlignment:
+                                                                                MainAxisAlignment.spaceAround,
+                                                                            children: [
+                                                                              Container(
+                                                                                height: 43,
+                                                                                child: ElevatedButton(
+                                                                                  style: ElevatedButton.styleFrom(
+                                                                                      backgroundColor: Colors.white60,
+                                                                                      side: BorderSide(color: Color.fromARGB(255, 165, 165, 165), width: 1.5),
+                                                                                      shape: RoundedRectangleBorder(
+                                                                                        borderRadius: BorderRadius.circular(7), // <-- Radius
+                                                                                      )),
+                                                                                  onPressed: (() {
+                                                                                    Navigator.pop(context);
+                                                                                  }),
+                                                                                  child: Text(
+                                                                                    "Cancel",
+                                                                                    style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 20),
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                              Container(
+                                                                                height: 43,
+                                                                                child: ElevatedButton(
+                                                                                  style: ElevatedButton.styleFrom(
+                                                                                      backgroundColor: Color.fromARGB(182, 73, 134, 255),
+                                                                                      side: BorderSide(color: Color.fromARGB(255, 165, 165, 165), width: 1.5),
+                                                                                      shape: RoundedRectangleBorder(
+                                                                                        borderRadius: BorderRadius.circular(7), // <-- Radius
+                                                                                      )),
+                                                                                  onPressed: () async {
+                                                                                    showDialog(
+                                                                                        context: context,
+                                                                                        builder: ((context) => Center(
+                                                                                              child: CircularProgressIndicator(),
+                                                                                            )));
+                                                                                    await ExamMethods.sendMessage(examList[index], contactNumber, simSlot);
+                                                                                    Navigator.pop(context);
+                                                                                    Navigator.pop(context);
+                                                                                  },
+                                                                                  child: Text(
+                                                                                    "Send",
+                                                                                    style: TextStyle(color: Color.fromARGB(221, 255, 255, 255), fontWeight: FontWeight.bold, fontSize: 20),
+                                                                                  ),
+                                                                                ),
+                                                                              )
+                                                                            ],
+                                                                          ),
+                                                                        ]),
+                                                                  ),
+                                                                );
+                                                              })),
+                                                      transitionDuration:
+                                                          Duration(
+                                                              milliseconds:
+                                                                  150),
+                                                      barrierLabel: '',
+                                                      pageBuilder: (context,
+                                                          animation1,
+                                                          animation2) {
+                                                        return Text(
+                                                            "page builder");
+                                                      });
+                                                },
                                                 child: Container(
                                                   alignment: Alignment.center,
                                                   child: Text(

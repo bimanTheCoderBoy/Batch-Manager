@@ -1,8 +1,9 @@
+import 'package:batch_manager/pages/notes/viewpdf/pdfes.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
-
+import 'package:firebase_storage/firebase_storage.dart';
 import '../fileMethod.dart';
 
 class ViewPdf extends StatefulWidget {
@@ -14,11 +15,22 @@ class ViewPdf extends StatefulWidget {
 
 class _ViewPdfState extends State<ViewPdf> {
   List classs = [];
+  bool isDispose = false;
+  @override
+  void dispose() {
+    isDispose = true;
+    // ignore: avoid_print
+    print('Dispose used');
+    super.dispose();
+  }
+
   classUpdate() async {
     classs = await Note.getClasses();
-    setState(() {
-      classs = classs;
-    });
+    if (!isDispose) {
+      setState(() {
+        classs = classs;
+      });
+    }
   }
 
   @override
@@ -33,7 +45,8 @@ class _ViewPdfState extends State<ViewPdf> {
       margin: EdgeInsets.only(top: 30, bottom: 20),
       child: Container(
         padding: EdgeInsets.only(top: 10),
-        width: MediaQuery.of(context).size.width - 30,
+        margin: EdgeInsets.only(bottom: 30),
+        width: MediaQuery.of(context).size.width - 23,
         decoration: BoxDecoration(
             color: Colors.white, borderRadius: BorderRadius.circular(10)),
         child: Column(
@@ -80,7 +93,15 @@ class _ViewPdfState extends State<ViewPdf> {
                                   backgroundColor: Colors.white,
                                   elevation: 0,
                                 ),
-                                onPressed: () {},
+                                onPressed: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute<void>(
+                                          builder: (BuildContext context) =>
+                                              Pdfs(
+                                                path: "files/${classs[index]}",
+                                              )));
+                                },
                                 child: Container(
                                   alignment: Alignment.centerLeft,
                                   child: Text(

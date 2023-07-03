@@ -4,6 +4,8 @@ import 'package:batch_manager/pages/batches_page.dart';
 import 'package:batch_manager/pages/exam/exam.dart';
 import 'package:batch_manager/pages/finance.dart';
 import 'package:batch_manager/pages/notes/fileMethod.dart';
+import 'package:batch_manager/pages/quiz/createQuiz.dart';
+import 'package:batch_manager/pages/remender/remender.dart';
 import 'package:batch_manager/pages/student_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -57,18 +59,29 @@ class _HomePageeState extends State<HomePagee> {
     studentInstance.docs.map(
       (e) {
         if (e.data()["account"].isNotEmpty) {
-          if (e.data()["account"]?[0]?["isPaid"] ?? false == true) {
-            me += e.data()["account"]?[0]?["dueMoney"] ?? 0;
-          }
+          // if (e.data()["account"]?[0]?["isPaid"] ?? false == true) {
+          //   me += e.data()["account"]?[0]?["dueMoney"] ?? 0;
+          // }
 
           expectedMe += e.data()["account"]?[0]?["dueMoney"] ?? 0;
         }
         return ({});
       },
     ).toList();
-    earningDetails["MonthlyEarning"] = await me;
+
     earningDetails["ExpectedME"] = await expectedMe;
-    earningDetails["Total"] = await earningDetails["Due"]! + expectedMe as int;
+
+    try {
+      earningDetails["MonthlyEarning"] = await userEarning[0]["me"];
+      me = await userEarning[0]["me"];
+      earningDetails["Due"] = await userEarning[0]["due"]!;
+      earningDetails["Total"] =
+          await userEarning[0]["due"]! + expectedMe as int;
+    } catch (e) {
+      earningDetails["Total"] =
+          await earningDetails["Due"]! + expectedMe as int;
+    }
+
     earningDetails["Parcentage"] = await (me /
             ((earningDetails["Total"] == 0) ? 1 : earningDetails["Total"])) *
         100;
@@ -79,7 +92,7 @@ class _HomePageeState extends State<HomePagee> {
       userEarning[0] = {
         "due": userEarning[0]["due"],
         "expectedMe": earningDetails["ExpectedME"],
-        "me": earningDetails["MonthlyEarning"],
+        "me": userEarning[0]["me"],
         "total": earningDetails["Total"],
         "time": userEarning[0]["time"]
       };
@@ -786,6 +799,43 @@ class _HomePageeState extends State<HomePagee> {
                                           context,
                                           MaterialPageRoute<void>(
                                             builder: (BuildContext context) =>
+                                                const Remender(),
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        height: 70,
+                                        width: 70,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white70,
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: Icon(
+                                          Icons.access_alarm,
+                                          size: 35,
+                                          color: Color.fromARGB(
+                                              255, 206, 137, 137),
+                                        ),
+                                      ),
+                                    ),
+                                    const Text(
+                                      "Reminder",
+                                      style: TextStyle(
+                                          fontSize: 10,
+                                          color:
+                                              Color.fromARGB(221, 35, 34, 34)),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  children: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute<void>(
+                                            builder: (BuildContext context) =>
                                                 const Exam(),
                                           ),
                                         );
@@ -918,7 +968,7 @@ class _HomePageeState extends State<HomePagee> {
                                                 MaterialPageRoute<void>(
                                                   builder:
                                                       (BuildContext context) =>
-                                                          const Anouncement(),
+                                                          QuizApp(),
                                                 ),
                                               );
                                               setState(() {

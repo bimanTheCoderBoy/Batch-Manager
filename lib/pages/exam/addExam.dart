@@ -434,18 +434,19 @@ class ExamMethods {
       if (batches.contains(e.data()['batch'])) {
         //exam Array checking
         var examArray = e.data()['studentExamArray'];
+        if (examArray != null) {
+          for (var ele in examArray) {
+            if (ele["examName"] == examName) {
+              var markDistributionObject = {
+                "sId": e.id,
+                "sName": e.data()['name'],
+                "sBatch": e.data()['batch'],
+                "sMark": ele['yourMarks']
+              };
 
-        for (var ele in examArray) {
-          if (ele["examName"] == examName) {
-            var markDistributionObject = {
-              "sId": e.id,
-              "sName": e.data()['name'],
-              "sBatch": e.data()['batch'],
-              "sMark": ele['yourMarks']
-            };
-
-            markDistributionArray.add(markDistributionObject);
-            break;
+              markDistributionArray.add(markDistributionObject);
+              break;
+            }
           }
         }
       }
@@ -492,6 +493,42 @@ class ExamMethods {
     var user = FirebaseAuth.instance.currentUser;
 
     //database operation
+
+    //student exam add----------------------------------------------->
+    var studentInstance = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .collection("student")
+        .get();
+
+    for (var e in studentInstance.docs) {
+      if (exam['batches'].contains(e.data()['batch'])) {
+        var studentExamArray = [];
+        try {
+          studentExamArray = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user!.uid)
+              .collection("student")
+              .doc(e.id)
+              .get()
+              .then((value) => value.data()?["studentExamArray"]);
+        } catch (e) {
+          studentExamArray = [];
+        }
+
+        var updatedStudentExamArray = [];
+        for (var e in studentExamArray) {
+          if (e['examName'] == exam['examName']) continue;
+          updatedStudentExamArray.add(e);
+        }
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user!.uid)
+            .collection("student")
+            .doc(e.id)
+            .update({"studentExamArray": updatedStudentExamArray});
+      }
+    }
     //teacher exam object
     var teacherInstance = await FirebaseFirestore.instance
         .collection('users')
@@ -513,40 +550,6 @@ class ExamMethods {
         .collection('users')
         .doc(user!.uid)
         .update({"examArray": updatedExamArray});
-
-    //student exam add----------------------------------------------->
-    var studentInstance = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user!.uid)
-        .collection("student")
-        .get();
-
-    for (var e in studentInstance.docs) {
-      if (exam['batches'].contains(e.data()['batch'])) {
-        var studentExamArray = [];
-        try {
-          studentExamArray = await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user!.uid)
-              .collection("student")
-              .doc(e.id)
-              .get()
-              .then((value) => value.data()?["studentExamArray"]);
-        } catch (e) {}
-
-        var updatedStudentExamArray = [];
-        for (var e in studentExamArray) {
-          if (e['examName'] == exam['examName']) continue;
-          updatedStudentExamArray.add(e);
-        }
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user!.uid)
-            .collection("student")
-            .doc(e.id)
-            .update({"studentExamArray": updatedStudentExamArray});
-      }
-    }
   }
 
 //send Message

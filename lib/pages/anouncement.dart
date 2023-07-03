@@ -92,10 +92,51 @@ class _AnouncementState extends State<Anouncement> {
   //       twilioNumber: '+12705143722');
   // }
 
+  //store messages into the batchArray
+  _storeMessageIntoBatch(List<Batch> batchName, String message) async {
+    var user = FirebaseAuth.instance.currentUser;
+    var batchesInstance = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .collection('Batches')
+        .get();
+    List messageBatchArray = batchName.where((ele) => ele.value).toList();
+    messageBatchArray = messageBatchArray.map((e) => e.id).toList();
+    for (var e in batchesInstance.docs) {
+      if (messageBatchArray.contains(e.id)) {
+        var messageArray = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('Batches')
+            .doc(e.id)
+            .get()
+            .then((value) => value.data()?['batchMessageArray']);
+        var newMessage = {
+          "message": message,
+          "date": "${DateTime.now().hour}:${DateTime.now().minute}",
+          "time": DateTime.now().toLocal().toString().substring(0, 10)
+        };
+        if (messageArray == null) {
+          messageArray = [newMessage];
+        } else {
+          messageArray = [newMessage, ...messageArray];
+        }
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user!.uid)
+            .collection('Batches')
+            .doc(e.id)
+            .update({'batchMessageArray': messageArray});
+      }
+    }
+    return Future.value(true);
+  }
+
   send(String massage) async {
     int count = 0;
     bool selectedOrNot = false;
     var user = FirebaseAuth.instance.currentUser;
+    await _storeMessageIntoBatch(batches, massage);
     for (var e in batches) {
       if (count > 90) {
         Fluttertoast.showToast(

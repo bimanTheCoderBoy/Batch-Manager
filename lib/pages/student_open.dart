@@ -644,6 +644,30 @@ class _StudentOpenState extends State<StudentOpen> {
       );
     }
 
+    sendConfermation(monthYear) async {
+      var result = await BackgroundSms.sendMessage(
+          phoneNumber: widget.number.toString(),
+          message:
+              "you have successfully paid your Chemia Galaxy tuition fees for ${monthYear}");
+    }
+
+    updateMonthlyEarning(amount) async {
+      user = FirebaseAuth.instance.currentUser;
+      var userInstance = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user!.uid)
+          .get();
+
+      List userEarning = await userInstance.data()?['monthlyEarningArray'];
+      if (userEarning.isNotEmpty) {
+        userEarning[0]['me'] = userEarning[0]['me'] + amount as int;
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user!.uid)
+            .update({"monthlyEarningArray": userEarning});
+      }
+    }
+
     fees() {
       List<MonthlyFee> account = widget.account;
       return ListView.builder(
@@ -688,7 +712,10 @@ class _StudentOpenState extends State<StudentOpen> {
                       child: IconButton(
                           splashColor: Colors.black45,
                           iconSize: 30,
-                          onPressed: () {
+                          onPressed: () async {
+                            await sendConfermation("${account[index].month}"
+                                " ${account[index].year}");
+                            await updateMonthlyEarning(account[index].dueMoney);
                             setState(() {
                               account[index].isPaid = true;
                               account[index].paidDate = DateTime.now()

@@ -166,8 +166,7 @@ earningUpdate() async {
   earningArray = await earningInstance.data()?["monthlyEarningArray"];
   bool check = true;
   for (var e in earningArray) {
-    if (e['time'] ==
-        "${mon[DateTime.now().month - 1]} : ${DateTime.now().year}") {
+    if (e['time'] == "${mon[DateTime.now().month]} : ${DateTime.now().year}") {
       check = false;
       break;
     }
@@ -232,7 +231,8 @@ void main() async {
     statusBarColor: Colors.transparent,
   ));
   await Workmanager().initialize(
-    callbackDispatcher, // The top level function, aka callbackDispatcher
+    callbackDispatcher,
+    // The top level function, aka callbackDispatcher
     // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
   );
   await Workmanager().registerPeriodicTask(
@@ -241,8 +241,8 @@ void main() async {
     frequency: const Duration(days: 1),
   );
   await Workmanager().registerPeriodicTask(
-    monthlyearning,
-    monthlyearning,
+    'monthlyearning',
+    'monthlyearning',
     frequency: const Duration(days: 1),
   );
   // await Workmanager().cancelAll();

@@ -2,6 +2,7 @@
 
 import 'dart:math';
 
+import 'package:background_sms/background_sms.dart';
 import 'package:batch_manager/pages/batches_page.dart';
 import 'package:batch_manager/pages/student_open.dart';
 import 'package:batch_manager/util/monthlyFee.dart';
@@ -169,20 +170,27 @@ class _StudentState extends State<Student> {
     List<Object> mm = [];
 
     // mm.add({"year": "biman"});
-    student!.add({
-      "name": _studentName.text,
-      "number":
-          int.parse(_studentNumber.text == "" ? "0" : _studentNumber.text),
-      "guardianNumber":
-          int.parse(_guardianNumber.text == "" ? "0" : _guardianNumber.text),
-      "batch":
-          (widget.batch == "Student Dashboard") ? dropdownvalue : widget.batch,
-      "account": mm,
-      "balance": 0,
-    });
-    setState(() {
-      fetchRecord();
-    });
+    try {
+      student!.add({
+        "name": _studentName.text,
+        "number":
+            int.parse(_studentNumber.text == "" ? "0" : _studentNumber.text),
+        "guardianNumber":
+            int.parse(_guardianNumber.text == "" ? "0" : _guardianNumber.text),
+        "batch": (widget.batch == "Student Dashboard")
+            ? dropdownvalue
+            : widget.batch,
+        "account": mm,
+        "balance": 0,
+      });
+      BackgroundSms.sendMessage(
+          message:
+              'Welcome to Chemia Galaxy \nyour batch name is ${(widget.batch == "Student Dashboard") ? dropdownvalue : widget.batch}\nStart your happy Chemistry Journey with Chemia Galaxy 🤓',
+          phoneNumber: _studentNumber.text);
+      setState(() {
+        fetchRecord();
+      });
+    } catch (e) {}
   }
 
   // List of items in our dropdown menu

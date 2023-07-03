@@ -43,6 +43,7 @@ class _MyRegisterState extends State<Register> {
           "monthlyEarningArray": []
         });
         // await load();
+      
       });
     } catch (e) {
       Fluttertoast.showToast(

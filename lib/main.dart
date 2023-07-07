@@ -2,7 +2,7 @@ import 'package:animated_splash_screen/animated_splash_screen.dart';
 
 import 'package:batch_manager/pages/homepage.dart';
 import 'package:batch_manager/pages/login.dart';
-import 'package:batch_manager/pages/notes/sendpdf/sendfile.dart';
+// import 'package:batch_manager/pages/Notess/sendfile.dart';
 import 'package:batch_manager/pages/register.dart';
 
 import 'package:batch_manager/pages/student_page.dart';
@@ -23,7 +23,7 @@ import 'package:http/http.dart' as http;
 import 'pages/batches_page.dart';
 import 'package:flutter/services.dart';
 import 'pages/exam/exam.dart';
-import 'pages/notes/notes.dart';
+// import 'pages/notes/notes.dart';
 import 'util/route.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:batch_manager/util/noti.dart';

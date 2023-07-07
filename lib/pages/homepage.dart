@@ -3,7 +3,7 @@ import 'package:batch_manager/pages/anouncement.dart';
 import 'package:batch_manager/pages/batches_page.dart';
 import 'package:batch_manager/pages/exam/exam.dart';
 import 'package:batch_manager/pages/finance.dart';
-import 'package:batch_manager/pages/notes/fileMethod.dart';
+// import 'package:batch_manager/pages/notes/fileMethod.dart';
 import 'package:batch_manager/pages/quiz/createQuiz.dart';
 import 'package:batch_manager/pages/remender/remender.dart';
 import 'package:batch_manager/pages/student_page.dart';
@@ -16,7 +16,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:themed/themed.dart';
 
-import 'notes/notes.dart';
+import 'Notess/NoteClasses.dart';
+// import 'notes/notes.dart';
 
 class HomePagee extends StatefulWidget {
   const HomePagee({super.key});
@@ -762,7 +763,7 @@ class _HomePageeState extends State<HomePagee> {
                                           context,
                                           MaterialPageRoute<void>(
                                             builder: (BuildContext context) =>
-                                                const Notes(),
+                                                const AllClassesNote(),
                                           ),
                                         );
                                       },

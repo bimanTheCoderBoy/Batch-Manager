@@ -94,6 +94,7 @@ class _AnouncementState extends State<Anouncement> {
 
   //store messages into the batchArray
   _storeMessageIntoBatch(List<Batch> batchName, String message) async {
+    print(message);
     var user = FirebaseAuth.instance.currentUser;
     var batchesInstance = await FirebaseFirestore.instance
         .collection('users')

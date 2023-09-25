@@ -713,35 +713,32 @@ class _StudentOpenState extends State<StudentOpen> {
                           splashColor: Colors.black45,
                           iconSize: 30,
                           onPressed: () async {
-                            await sendConfermation("${account[index].month}"
-                                " ${account[index].year}");
-                            await updateMonthlyEarning(account[index].dueMoney);
-                            setState(() {
-                              account[index].isPaid = true;
-                              account[index].paidDate = DateTime.now()
-                                  .toLocal()
-                                  .toString()
-                                  .substring(0, 10);
+                            account[index].isPaid = true;
+                            account[index].paidDate = DateTime.now()
+                                .toLocal()
+                                .toString()
+                                .substring(0, 10);
 
-                              List<Object> account1 = [];
-                              for (int i = 0; i < account.length; i++) {
-                                account1.add(account[i].toJson());
-                              }
-                              widget.balance =
-                                  widget.balance - account[index].dueMoney;
-                              FirebaseFirestore.instance
-                                  .collection('users')
-                                  .doc(user.uid)
-                                  .collection('student')
-                                  .doc(widget.id)
-                                  .update({
-                                "name": widget.name,
-                                "number": widget.number,
-                                "batch": widget.batch,
-                                "balance": widget.balance,
-                                "account": account1
-                              });
+                            List<Object> account1 = [];
+                            for (int i = 0; i < account.length; i++) {
+                              account1.add(account[i].toJson());
+                            }
+                            widget.balance =
+                                widget.balance - account[index].dueMoney;
+                            FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(user.uid)
+                                .collection('student')
+                                .doc(widget.id)
+                                .update({
+                              "name": widget.name,
+                              "number": widget.number,
+                              "batch": widget.batch,
+                              "balance": widget.balance,
+                              "account": account1
                             });
+                            await updateMonthlyEarning(account[index].dueMoney);
+                            setState(() {});
                           },
                           icon: Container(
                               height: 30,
@@ -759,24 +756,71 @@ class _StudentOpenState extends State<StudentOpen> {
                               ))),
                     )
                   else
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
                       children: [
-                        Text(
-                          "Paid",
-                          style: GoogleFonts.actor(
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                              color: Color.fromARGB(255, 0, 134, 36)),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Paid",
+                              style: GoogleFonts.actor(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromARGB(255, 0, 134, 36)),
+                            ),
+                            Text(
+                              account[index].paidDate,
+                              style: GoogleFonts.actor(
+                                  fontSize: 15, color: Colors.black54),
+                            ),
+                          ],
                         ),
-                        Text(
-                          account[index].paidDate,
-                          style: GoogleFonts.actor(
-                              fontSize: 15, color: Colors.black54),
+                        const SizedBox(
+                          width: 20,
                         ),
+                        if (!account[index].message)
+                          ElevatedButton(
+                              onPressed: () async {
+                                // Call the sendMessage function when the button is clicked.
+                                // sendMessage();
+                                await sendConfermation("${account[index].month}"
+                                    " ${account[index].year}");
+
+                                account[index].message = true;
+
+                                List<Object> account1 = [];
+                                for (int i = 0; i < account.length; i++) {
+                                  account1.add(account[i].toJson());
+                                }
+
+                                FirebaseFirestore.instance
+                                    .collection('users')
+                                    .doc(user.uid)
+                                    .collection('student')
+                                    .doc(widget.id)
+                                    .update({
+                                  "name": widget.name,
+                                  "number": widget.number,
+                                  "batch": widget.batch,
+                                  "balance": widget.balance,
+                                  "account": account1
+                                });
+                                setState(() {});
+                              },
+                              style: ElevatedButton.styleFrom(
+                                shape: CircleBorder(),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 10.0,
+                                    vertical: 10.0), // Button size
+                                primary: Colors.blue, // Button color
+                              ),
+                              child: Icon(
+                                Icons.sms_rounded,
+                                size: 20,
+                              )),
                       ],
-                    ),
+                    )
                 ],
               ),
             );

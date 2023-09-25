@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import './Question.dart';
 import 'dart:convert';
 
@@ -6,8 +8,9 @@ class Quiz {
   String? name;
   List<String>? batches;
   String? time;
-  bool? switchValue = false;
+  DateTime? switchTime;
   List<Question> questions = [];
+
   Quiz();
   // Quiz(
   //     {this.id,
@@ -27,7 +30,10 @@ class Quiz {
       });
     }
     time = json['time'];
-    switchValue = json['switchValue'];
+    if (json['switchTime'] != null) {
+      switchTime = DateTime.parse(json['switchTime']);
+    }
+
     if (json['questions'] != null) {
       questions = [];
       json['questions'].forEach((v) {
@@ -44,7 +50,9 @@ class Quiz {
       data['batches'] = this.batches!.map((v) => v).toList();
     }
     data['time'] = this.time;
-    data['switchValue'] = this.switchValue;
+    if (switchTime != null) {
+      data['switchTime'] = switchTime!.toIso8601String();
+    }
     if (this.questions != null) {
       data['questions'] = this.questions!.map((v) => v.toJson()).toList();
     }

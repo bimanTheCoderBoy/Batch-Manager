@@ -86,6 +86,7 @@ class _HomePageeState extends State<HomePagee> {
     earningDetails["Parcentage"] = await (me /
             ((earningDetails["Total"] == 0) ? 1 : earningDetails["Total"])) *
         100;
+
     double tt = earningDetails["Parcentage"] as double;
 
     earningDetails["Parcentage"] = tt.toInt();
@@ -94,6 +95,7 @@ class _HomePageeState extends State<HomePagee> {
         "due": userEarning[0]["due"],
         "expectedMe": earningDetails["ExpectedME"],
         "me": userEarning[0]["me"],
+        // "me": 000,
         "total": earningDetails["Total"],
         "time": userEarning[0]["time"]
       };
@@ -102,6 +104,7 @@ class _HomePageeState extends State<HomePagee> {
         "due": 0,
         "expectedMe": earningDetails["ExpectedME"],
         "me": earningDetails["MonthlyEarning"],
+        // "me": 000,
         "total": earningDetails["Total"],
         "time": "${mon[DateTime.now().month - 1]} : ${DateTime.now().year}"
       });
@@ -584,8 +587,12 @@ class _HomePageeState extends State<HomePagee> {
                                       animationDuration: 2000,
                                       radius: 90,
                                       lineWidth: 10,
-                                      percent:
-                                          (earningDetails['Parcentage']! / 100),
+                                      percent: (earningDetails['Parcentage']! /
+                                                  100) >
+                                              1
+                                          ? 1
+                                          : (earningDetails['Parcentage']! /
+                                              100),
                                       progressColor:
                                           Color.fromARGB(255, 206, 137, 137),
                                       backgroundColor:
@@ -768,8 +775,8 @@ class _HomePageeState extends State<HomePagee> {
                                         );
                                       },
                                       child: Container(
-                                        height: 70,
-                                        width: 70,
+                                        height: 50,
+                                        width: 50,
                                         decoration: BoxDecoration(
                                           color: Colors.white70,
                                           borderRadius:
@@ -800,13 +807,54 @@ class _HomePageeState extends State<HomePagee> {
                                           context,
                                           MaterialPageRoute<void>(
                                             builder: (BuildContext context) =>
+                                                QuizApp(),
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        height: 50,
+                                        width: 50,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white70,
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            "Q",
+                                            style: GoogleFonts.salsa(
+                                                fontSize: 38,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color.fromARGB(
+                                                    255, 206, 137, 137)),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const Text(
+                                      "Quizes",
+                                      style: TextStyle(
+                                          fontSize: 10,
+                                          color:
+                                              Color.fromARGB(221, 35, 34, 34)),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  children: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute<void>(
+                                            builder: (BuildContext context) =>
                                                 const Remender(),
                                           ),
                                         );
                                       },
                                       child: Container(
-                                        height: 70,
-                                        width: 70,
+                                        height: 50,
+                                        width: 50,
                                         decoration: BoxDecoration(
                                           color: Colors.white70,
                                           borderRadius:
@@ -842,8 +890,8 @@ class _HomePageeState extends State<HomePagee> {
                                         );
                                       },
                                       child: Container(
-                                        height: 70,
-                                        width: 70,
+                                        height: 50,
+                                        width: 50,
                                         decoration: BoxDecoration(
                                           color: Colors.white70,
                                           borderRadius:
@@ -969,7 +1017,7 @@ class _HomePageeState extends State<HomePagee> {
                                                 MaterialPageRoute<void>(
                                                   builder:
                                                       (BuildContext context) =>
-                                                          QuizApp(),
+                                                          Anouncement(),
                                                 ),
                                               );
                                               setState(() {

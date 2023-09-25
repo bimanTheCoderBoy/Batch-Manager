@@ -90,7 +90,12 @@ class _FinanceState extends State<Finance> {
                                       radius: 90,
                                       lineWidth: 10,
                                       percent: ((financeArray[index]['me'] /
-                                          financeArray[index]['total'])),
+                                                  financeArray[index]
+                                                      ['total'])) >
+                                              1
+                                          ? 1
+                                          : ((financeArray[index]['me'] /
+                                              financeArray[index]['total'])),
                                       progressColor:
                                           Color.fromARGB(255, 206, 137, 137),
                                       backgroundColor:

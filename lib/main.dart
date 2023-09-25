@@ -112,7 +112,8 @@ monthlyFees({cc = true}) async {
         "year": DateTime.now().year.toString(),
         "isPaid": false,
         "paidDate": "",
-        "dueMoney": price
+        "dueMoney": price,
+        "message": false
       });
     }
     FirebaseFirestore.instance
@@ -184,7 +185,7 @@ earningUpdate() async {
     await FirebaseFirestore.instance.collection('users').doc(user!.uid).update({
       "monthlyEarningArray": [newMonth, ...earningArray]
     });
-  }
+  } else {}
 }
 
 const fee = 'monthlyFees';

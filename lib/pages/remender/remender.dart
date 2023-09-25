@@ -95,6 +95,8 @@ class _RemenderState extends State<Remender> {
       return false;
     }).toList();
     for (var e in accountStudent) {
+      // print(e);
+      // print("sdzffffffffffffffffffff");
       String number = (contactNumber == 'Student')
           ? e.number.toString()
           : e.guardianNumber.toString();
@@ -112,6 +114,7 @@ class _RemenderState extends State<Remender> {
 
       try {
         await sendMsg(number, e.balance - price, simSlot);
+        // print("dssssssssssssssssssssssssssssssssssss");
       } catch (e) {}
     }
     Fluttertoast.showToast(
@@ -128,7 +131,7 @@ class _RemenderState extends State<Remender> {
     var result = await BackgroundSms.sendMessage(
         phoneNumber: number.toString(),
         message:
-            "Reminder from CHEMIA GALAXY:\nyou have ${balance} rupees due including the current month please pay your due amount as soon as possible");
+            "Reminder from CHEMIA GALAXY:\nyou have ${balance} rupees due.\n please pay your due amount as soon as possible");
   }
 
   @override

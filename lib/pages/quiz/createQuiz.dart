@@ -36,6 +36,7 @@ class _HomePageState extends State<HomePage> {
   List batches = [];
   Quiz quiz = Quiz();
   List<Quiz> Quizes = [];
+  List<bool> switchArray = [];
   late String dropdownvalue;
   int batchCount = 0;
   dropDownBatchdata() async {
@@ -56,8 +57,30 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  setSwitchArray() {
+    for (int i = 0; i < Quizes.length; i++) {
+      DateTime nowTime = DateTime.now();
+      DateTime? lastOnTime = Quizes[i].switchTime;
+      Duration? diff;
+      if (lastOnTime == null) {
+        switchArray.add(false);
+      } else {
+        diff = nowTime.difference(lastOnTime);
+        int miniutes = diff.inMinutes;
+        int quizTime = int.parse(Quizes[i].time as String);
+
+        if (miniutes < quizTime) {
+          switchArray.add(true);
+        } else {
+          switchArray.add(false);
+        }
+      }
+    }
+  }
+
   load() async {
     Quizes = await readQuizes();
+    setSwitchArray();
     if (mounted) {
       setState(() {});
     }
@@ -396,256 +419,289 @@ class _HomePageState extends State<HomePage> {
               : ListView.builder(
                   itemCount: Quizes.length,
                   itemBuilder: (context, index) {
-                    return Card(
-                      clipBehavior: Clip.hardEdge,
-                      color: Color.fromARGB(192, 145, 145, 145),
-                      shadowColor: Colors.black54,
-                      elevation: 15,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: 4,
-                            child: Container(
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 8.0, right: 8, top: 8),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "${Quizes[index].name as String}"
-                                                  .length <=
-                                              25
-                                          ? "${Quizes[index].name as String}"
-                                          : "${Quizes[index].name as String}"
-                                                  .substring(0, 23) +
-                                              "..",
-                                      style: TextStyle(
-                                          color:
-                                              Color.fromARGB(255, 31, 31, 31),
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    SizedBox(
-                                      height: 6,
-                                    ),
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.timer,
-                                          color:
-                                              Color.fromARGB(255, 195, 14, 2),
-                                        ),
-                                        Text(
-                                            "${Quizes[index].time as String} minutes",
-                                            style: TextStyle(
-                                              color: Color.fromARGB(
-                                                  255, 31, 31, 31),
-                                              fontSize: 16,
-                                            )),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                                backgroundColor:
-                                                    Colors.blueGrey[700]),
-                                            onPressed: () {},
-                                            child: Text(
-                                              "Results",
-                                              style: TextStyle(
-                                                  color: Colors.amber),
-                                            )),
-                                        Expanded(flex: 1, child: SizedBox()),
-                                        IconButton(
-                                            onPressed: () {
-                                              showDialog(
-                                                context: context,
-                                                builder: (context) {
-                                                  return Dialog(
-                                                    backgroundColor:
-                                                        Colors.white,
-                                                    insetPadding:
-                                                        EdgeInsets.only(
-                                                            left: 15,
-                                                            right: 15),
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        10)),
-                                                    child: Container(
-                                                      padding:
-                                                          EdgeInsets.all(10),
-                                                      // alignment: Alignment.center,
-                                                      child: Column(
-                                                          mainAxisSize:
-                                                              MainAxisSize.min,
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            Container(
-                                                              margin: EdgeInsets
-                                                                  .only(
-                                                                      bottom:
-                                                                          20),
-                                                              alignment:
-                                                                  Alignment
-                                                                      .center,
-                                                              child: Text(
-                                                                "Are you sure, you want to delete ?",
-                                                                style: TextStyle(
-                                                                    color: Color
-                                                                        .fromARGB(
-                                                                            255,
-                                                                            67,
-                                                                            87,
-                                                                            97),
-                                                                    fontSize:
-                                                                        25,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold),
-                                                              ),
-                                                            ),
-                                                            Row(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .spaceAround,
-                                                              children: [
-                                                                Container(
-                                                                  height: 43,
-                                                                  child:
-                                                                      ElevatedButton(
-                                                                    style: ElevatedButton.styleFrom(
-                                                                        backgroundColor: Color.fromARGB(182, 184, 35, 35),
-                                                                        side: BorderSide(color: Color.fromARGB(255, 32, 32, 32), width: 1.5),
-                                                                        shape: RoundedRectangleBorder(
-                                                                          borderRadius:
-                                                                              BorderRadius.circular(7), // <-- Radius
-                                                                        )),
-                                                                    onPressed:
-                                                                        (() async {
-                                                                      showDialog(
-                                                                          context:
-                                                                              context,
-                                                                          builder:
-                                                                              ((context) {
-                                                                            return Center(
-                                                                              child: CircularProgressIndicator(),
-                                                                            );
-                                                                          }));
-                                                                      await deleteQuiz(
-                                                                          Quizes[
-                                                                              index]);
-                                                                      Navigator.pop(
-                                                                          context);
-
-                                                                      Navigator.pop(
-                                                                          context);
-                                                                      load();
-                                                                    }),
-                                                                    child: Text(
-                                                                      "Yes",
-                                                                      style: TextStyle(
-                                                                          color: Color.fromARGB(
-                                                                              221,
-                                                                              255,
-                                                                              255,
-                                                                              255),
-                                                                          fontWeight: FontWeight
-                                                                              .bold,
-                                                                          fontSize:
-                                                                              20),
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                                Container(
-                                                                  height: 43,
-                                                                  child:
-                                                                      ElevatedButton(
-                                                                    style: ElevatedButton.styleFrom(
-                                                                        backgroundColor: Color.fromARGB(255, 255, 255, 255),
-                                                                        side: BorderSide(color: Color.fromARGB(255, 165, 165, 165), width: 1.5),
-                                                                        shape: RoundedRectangleBorder(
-                                                                          borderRadius:
-                                                                              BorderRadius.circular(7), // <-- Radius
-                                                                        )),
-                                                                    onPressed:
-                                                                        () {
-                                                                      Navigator.pop(
-                                                                          context);
-                                                                    },
-                                                                    child: Text(
-                                                                      "No",
-                                                                      style: TextStyle(
-                                                                          color: Colors
-                                                                              .black87,
-                                                                          fontWeight: FontWeight
-                                                                              .bold,
-                                                                          fontSize:
-                                                                              20),
-                                                                    ),
-                                                                  ),
-                                                                )
-                                                              ],
-                                                            ),
-                                                          ]),
-                                                    ),
-                                                  );
-                                                },
-                                              );
-                                            },
-                                            icon: Container(
-                                              height: 50,
-                                              width: 50,
-                                              decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          500),
-                                                  color: Color.fromARGB(
-                                                      255, 58, 76, 85)),
-                                              child: Icon(
-                                                Icons.delete,
-                                                color: Color.fromARGB(
-                                                    255, 221, 17, 3),
-                                              ),
-                                            ))
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
+                    // bool switchvalue = false;
+                    return TextButton(
+                      onPressed: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute<void>(
+                            builder: (BuildContext context) =>
+                                CreateQuizPage(Quizes[index], true),
                           ),
-                          Expanded(
-                            flex: 2,
-                            child: Container(
-                              // width: 100,
-                              height: 110,
-                              color: Colors.black45,
-                              child: Center(
-                                child: IconButton(
-                                  onPressed: () async {
-                                    await Navigator.push(
-                                      context,
-                                      MaterialPageRoute<void>(
-                                        builder: (BuildContext context) =>
-                                            CreateQuizPage(Quizes[index], true),
+                        );
+                        load();
+                      },
+                      child: Card(
+                        clipBehavior: Clip.hardEdge,
+                        color: Color.fromARGB(192, 145, 145, 145),
+                        shadowColor: Colors.black54,
+                        elevation: 15,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 4,
+                              child: Container(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 8.0, right: 8, top: 8),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "${Quizes[index].name as String}"
+                                                    .length <=
+                                                25
+                                            ? "${Quizes[index].name as String}"
+                                            : "${Quizes[index].name as String}"
+                                                    .substring(0, 23) +
+                                                "..",
+                                        style: TextStyle(
+                                            color:
+                                                Color.fromARGB(255, 31, 31, 31),
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold),
                                       ),
-                                    );
-                                    load();
-                                  },
-                                  icon: Icon(Icons.arrow_circle_right_rounded),
-                                  iconSize: 30,
+                                      SizedBox(
+                                        height: 6,
+                                      ),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.timer,
+                                            color:
+                                                Color.fromARGB(255, 195, 14, 2),
+                                          ),
+                                          Text(
+                                              "${Quizes[index].time as String} minutes",
+                                              style: TextStyle(
+                                                color: Color.fromARGB(
+                                                    255, 31, 31, 31),
+                                                fontSize: 16,
+                                              )),
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                  backgroundColor:
+                                                      Colors.blueGrey[700]),
+                                              onPressed: () {},
+                                              child: Text(
+                                                "Results",
+                                                style: TextStyle(
+                                                    color: Colors.amber),
+                                              )),
+                                          Expanded(flex: 1, child: SizedBox()),
+                                          IconButton(
+                                              onPressed: () {
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (context) {
+                                                    return Dialog(
+                                                      backgroundColor:
+                                                          Colors.white,
+                                                      insetPadding:
+                                                          EdgeInsets.only(
+                                                              left: 15,
+                                                              right: 15),
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10)),
+                                                      child: Container(
+                                                        padding:
+                                                            EdgeInsets.all(10),
+                                                        // alignment: Alignment.center,
+                                                        child: Column(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .center,
+                                                            children: [
+                                                              Container(
+                                                                margin: EdgeInsets
+                                                                    .only(
+                                                                        bottom:
+                                                                            20),
+                                                                alignment:
+                                                                    Alignment
+                                                                        .center,
+                                                                child: Text(
+                                                                  "Are you sure, you want to delete ?",
+                                                                  style: TextStyle(
+                                                                      color: Color.fromARGB(
+                                                                          255,
+                                                                          67,
+                                                                          87,
+                                                                          97),
+                                                                      fontSize:
+                                                                          25,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold),
+                                                                ),
+                                                              ),
+                                                              Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .spaceAround,
+                                                                children: [
+                                                                  Container(
+                                                                    height: 43,
+                                                                    child:
+                                                                        ElevatedButton(
+                                                                      style: ElevatedButton.styleFrom(
+                                                                          backgroundColor: Color.fromARGB(182, 184, 35, 35),
+                                                                          side: BorderSide(color: Color.fromARGB(255, 32, 32, 32), width: 1.5),
+                                                                          shape: RoundedRectangleBorder(
+                                                                            borderRadius:
+                                                                                BorderRadius.circular(7), // <-- Radius
+                                                                          )),
+                                                                      onPressed:
+                                                                          (() async {
+                                                                        showDialog(
+                                                                            context:
+                                                                                context,
+                                                                            builder:
+                                                                                ((context) {
+                                                                              return Center(
+                                                                                child: CircularProgressIndicator(),
+                                                                              );
+                                                                            }));
+                                                                        await deleteQuiz(
+                                                                            Quizes[index]);
+                                                                        Navigator.pop(
+                                                                            context);
+
+                                                                        Navigator.pop(
+                                                                            context);
+                                                                        load();
+                                                                      }),
+                                                                      child:
+                                                                          Text(
+                                                                        "Yes",
+                                                                        style: TextStyle(
+                                                                            color: Color.fromARGB(
+                                                                                221,
+                                                                                255,
+                                                                                255,
+                                                                                255),
+                                                                            fontWeight:
+                                                                                FontWeight.bold,
+                                                                            fontSize: 20),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  Container(
+                                                                    height: 43,
+                                                                    child:
+                                                                        ElevatedButton(
+                                                                      style: ElevatedButton.styleFrom(
+                                                                          backgroundColor: Color.fromARGB(255, 255, 255, 255),
+                                                                          side: BorderSide(color: Color.fromARGB(255, 165, 165, 165), width: 1.5),
+                                                                          shape: RoundedRectangleBorder(
+                                                                            borderRadius:
+                                                                                BorderRadius.circular(7), // <-- Radius
+                                                                          )),
+                                                                      onPressed:
+                                                                          () {
+                                                                        Navigator.pop(
+                                                                            context);
+                                                                      },
+                                                                      child:
+                                                                          Text(
+                                                                        "No",
+                                                                        style: TextStyle(
+                                                                            color:
+                                                                                Colors.black87,
+                                                                            fontWeight: FontWeight.bold,
+                                                                            fontSize: 20),
+                                                                      ),
+                                                                    ),
+                                                                  )
+                                                                ],
+                                                              ),
+                                                            ]),
+                                                      ),
+                                                    );
+                                                  },
+                                                );
+                                              },
+                                              icon: Container(
+                                                height: 50,
+                                                width: 50,
+                                                decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            500),
+                                                    color: Color.fromARGB(
+                                                        255, 58, 76, 85)),
+                                                child: Icon(
+                                                  Icons.delete,
+                                                  color: Color.fromARGB(
+                                                      255, 221, 17, 3),
+                                                ),
+                                              ))
+                                        ],
+                                      )
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          )
-                        ],
+                            Expanded(
+                              flex: 2,
+                              child: Container(
+                                // width: 100,
+                                height: 110,
+                                color: Colors.black45,
+                                child: Center(
+                                    child: Switch(
+                                  value: switchArray[index],
+                                  onChanged: (value) async {
+                                    if (!switchArray[index]) {
+                                      Quizes[index].switchTime = DateTime.now();
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: const [
+                                              CircularProgressIndicator(),
+                                              SizedBox(
+                                                height: 7,
+                                              ),
+                                              Text(
+                                                "Database Processing..",
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              )
+                                            ],
+                                          );
+                                        },
+                                      );
+                                      await addquiz(Quizes[index]);
+                                      // Navigator.pop(context);
+                                      navgatorKey.currentState!.pop(context);
+                                      // load();
+                                      // Navigator.pop(context);
+                                    }
+                                    setState(() {
+                                      switchArray[index] = value;
+                                    });
+                                  },
+                                )),
+                              ),
+                            )
+                          ],
+                        ),
                       ),
                     );
                   },
